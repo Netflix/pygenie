@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/Netflix/pygenie.svg?branch=master)](https://travis-ci.org/Netflix/pygenie)
+[![NetflixOSS Lifecycle](https://img.shields.io/osslifecycle/Netflix/pygenie.svg)]()
+
 ===================
 Genie Python Client
 ===================
