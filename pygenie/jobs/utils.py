@@ -225,8 +225,6 @@ def is_file(path):
 
     path = convert_to_unicode(path)
 
-    if sys.version_info < (3,):
-        path = path.encode('utf-8')
     return path is not None and \
         (os.path.isfile(path) \
          or path.startswith('s3://') \

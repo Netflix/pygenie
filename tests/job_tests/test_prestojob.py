@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
@@ -427,4 +429,15 @@ class TestingPrestoJobAdapters(unittest.TestCase):
                 u'user': u'jpresto',
                 u'version': u'0.0.1presto'
             }
+        )
+
+    def test_unicode_script(self):
+        """Test PrestoJob containing unicode script."""
+
+        job = pygenie.jobs.PrestoJob() \
+            .script(u'SELECT \'Siła_wyższa_(serial_telewizyjny)\'') \
+
+        assert_equals(
+            job.cmd_args,
+            u'-f script.presto'
         )
