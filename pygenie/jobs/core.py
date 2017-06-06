@@ -133,6 +133,8 @@ class Repr(object):
 class GenieJob(object):
     """Base Genie job."""
 
+    DEFAULT_CLUSTER_TAG = 99999
+
     def __init__(self, conf=None):
         assert conf is None or isinstance(conf, GenieConf), \
             "invalid conf '{}', should be None or GenieConf".format(conf)
@@ -179,7 +181,7 @@ class GenieJob(object):
         self.repr_obj.append('genie_username', (self._username,))
 
         #initialize cluster tags with default set of tags
-        self._cluster_tag_mapping[99999] = self.default_cluster_tags
+        self._cluster_tag_mapping[GenieJob.DEFAULT_CLUSTER_TAG] = self.default_cluster_tags
 
     def __repr__(self):
         return self.__unicode__()
