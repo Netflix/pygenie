@@ -294,7 +294,7 @@ class Genie(object):
 
         return resp.get('response', [])
 
-    def remove_all_application_configs(self, application_id):
+    def remove_all_configs_for_application(self, application_id):
         """
         Remove all configs from an application
 
@@ -330,7 +330,7 @@ class Genie(object):
 
         return resp.get('response', [])
 
-    def add_configs_to_application(self, application_id, configs):
+    def add_configs_for_application(self, application_id, configs):
         """
         Add configs to an application.
 
@@ -345,7 +345,7 @@ class Genie(object):
         Returns: None
 
         Example:
-            >>> add_configs_to_application('app1', ['config1', 'config2'])
+            >>> add_configs_for_application('app1', ['config1', 'config2'])
 
         """
         _check_type(configs, list)
@@ -719,20 +719,20 @@ class Genie(object):
             logger.info('Fetching additional commands from genie [%s/%s]',
                          params['page'], resp['page']['totalPages'])
 
-    def remove_all_command_configs(self, command_id):
+    def remove_all_configs_for_command(self, command_id):
         """
-        Remove all configs from a command
+        Remove all configs for a command.
 
         Args:
-            command_id (str): the command id to remove configs
+            command_id (str): the command id
 
         Returns: None
 
         Example:
-            >>> remove_all_command_configs('command2')
+            >>> remove_all_configs_for_command('cmd1')
 
         """
-        path = self.path_command + '/' + command_id + '/configs'
+        path = self.path_command + '/' + command_id
         _call(path, method='DELETE', raise_not_status=204)
 
     def get_configs_for_command(self, command_id):
@@ -755,7 +755,7 @@ class Genie(object):
 
         return resp.get('response', [])
 
-    def add_configs_to_command(self, command_id, configs):
+    def add_configs_for_command(self, command_id, configs):
         """
         Add configs to a command.
 
@@ -770,7 +770,7 @@ class Genie(object):
         Returns: None
 
         Example:
-            >>> add_configs_to_command('command1', ['config1', 'config2'])
+            >>> add_configs_for_command('command1', ['config1', 'config2'])
 
         """
         _check_type(configs, list)
@@ -962,6 +962,123 @@ class Genie(object):
         """
         path = self.path_command + '/' + command_id + '/tags/' + tag
         _call(path, method='DELETE', raise_not_status=204)
+
+    def remove_all_applications_for_command(self, command_id):
+        """
+        Remove applications for a command.
+
+        Args:
+            command_id (str): the command id
+
+        Returns: None
+
+        Example:
+            >>> remove_all_command_applications('command1')
+
+        """
+        path = self.path_command + '/' + command_id + '/applications'
+        _call(path, method='DELETE', raise_not_status=204)
+
+    def get_applications_for_command(self, command_id):
+        """
+        Get applications for a command
+
+        Args:
+            command_id (str): the command id
+
+        Returns:
+            list: the applications for the command
+
+        Example:
+            >>> get_applications_for_command('command1')
+            >>> ['app1', 'app2', 'app3']
+
+        """
+        path = self.path_command + '/' + command_id + '/applications'
+        resp = _call(path, none_on_404=True) or {}
+
+        return resp.get('response', [])
+
+    def add_applications_for_command(self, command_id, application_ids):
+        """
+        Add applications for a command.
+
+        Args:
+            command_id (str): the command id
+            application_ids (list): the application ids to add
+
+        Returns: None
+
+        Example:
+            >>> add_applications_for_command('cmd1', ['app1', 'app2'])
+
+        """
+        _check_type(application_ids, list)
+        path = self.path_command + '/' + command_id + '/applications'
+        _call(path, method='POST', data=application_ids, raise_not_status=204)
+
+    def set_application_for_command(self, command_id, application_ids):
+        """
+        Set applications for a command.
+
+        Args:
+            command_id (str): the command id
+            application_ids (list): the application ids to set
+
+        Returns: None
+
+        Example:
+            >>> set_application_for_command('cmd1', ['app1', 'app2', 'app3'])
+
+        """
+        _check_type(application_ids, list)
+        path = self.path_command + '/' + command_id + '/applications'
+        _call(path, method='PUT', data=application_ids, raise_not_status=204)
+
+    def remove_application_for_command(self, command_id, application_id):
+        """
+        Remove applications for a command.
+
+        Args:
+            command_id (str): the command id
+            application_id (str): the application to remove
+
+        Returns: None
+
+        Example:
+            >>> remove_application_for_command('cmd1', 'app1')
+
+        """
+        path = self.path_command + '/' + command_id + '/applications' + '/' \
+               + application_id
+        _call(path, method='DELETE', raise_not_status=204)
+
+    def get_clusters_for_command(self, command_id, status=None):
+        """
+        Get commands for a cluster.
+
+        Args:
+            command_id (str): the command id
+            status (optional[str]): filter by this cluster status. Valid
+                parameters are UP, OUT_OF_SERVICE, and TERMINATED
+
+        Returns:
+            list: the clusters
+
+        Examples:
+            >>> get_clusters_for_command('cmd1')
+            >>> [{'name':'cluster1'}, {'name':'cluster2'}]
+
+            >>> get_clusters_for_command('cmd1', status='UP')
+            >>> [{'name':'cluster2'}]
+
+        """
+        _verify_filters(status, ['UP', 'OUT_OF_SERVICE', 'TERMINATED'])
+        path = self.path_command + '/' + command_id + '/clusters'
+        params = {'status': status}
+        resp = _call(path, none_on_404=True, params=params) or {}
+
+        return resp.get('response')
 
     def get_clusters(self, filters=None, req_size=1000):
         """
@@ -1268,7 +1385,7 @@ class Genie(object):
         path = self.path_cluster + '/' + cluster_id + '/configs'
         _call(path, method='DELETE', raise_not_status=204)
 
-    def get_all_configs_for_cluster(self, cluster_id):
+    def get_configs_for_cluster(self, cluster_id):
         """
         Get configs for a cluster.
 
@@ -1279,7 +1396,7 @@ class Genie(object):
             list: the configurations for a cluster
 
         Example:
-            >>> get_all_configs_for_cluster('cluster1')
+            >>> get_configs_for_cluster('cluster1')
             >>> ['config1', 'config2']
         """
 
@@ -1339,7 +1456,7 @@ class Genie(object):
         path = self.path_cluster + '/' + cluster_id + '/dependencies'
         _call(path, method='DELETE', raise_not_status=204)
 
-    def get_all_dependencies_for_cluster(self, cluster_id):
+    def get_dependencies_for_cluster(self, cluster_id):
         """
         Get dependencies for a cluster.
 
@@ -1482,283 +1599,6 @@ class Genie(object):
         path = self.path_cluster + '/' + cluster_id + '/tags/' + tag
         _call(path, method='DELETE', raise_not_status=204)
 
-    def remove_all_applications_for_command(self, command_id):
-        """
-        Remove applications for a command.
-
-        Args:
-            command_id (str): the command id
-
-        Returns: None
-
-        Example:
-            >>> remove_all_command_applications('command1')
-
-        """
-        path = self.path_command + '/' + command_id + '/applications'
-        _call(path, method='DELETE', raise_not_status=204)
-
-    def get_applications_for_command(self, command_id):
-        """
-        Get applications for a command
-
-        Args:
-            command_id (str): the command id
-
-        Returns:
-            list: the applications for the command
-
-        Example:
-            >>> get_applications_for_command('command1')
-            >>> ['app1', 'app2', 'app3']
-
-        """
-        path = self.path_command + '/' + command_id + '/applications'
-        resp = _call(path, none_on_404=True) or {}
-
-        return resp.get('response', [])
-
-    def add_applications_for_command(self, command_id, application_ids):
-        """
-        Add applications for a command.
-
-        Args:
-            command_id (str): the command id
-            application_ids (list): the application ids to add
-
-        Returns: None
-
-        Example:
-            >>> add_applications_for_command('cmd1', ['app1', 'app2'])
-
-        """
-        _check_type(application_ids, list)
-        path = self.path_command + '/' + command_id + '/applications'
-        _call(path, method='POST', data=application_ids, raise_not_status=204)
-
-    def set_application_for_command(self, command_id, application_ids):
-        """
-        Set applications for a command.
-
-        Args:
-            command_id (str): the command id
-            application_ids (list): the application ids to set
-
-        Returns: None
-
-        Example:
-            >>> set_application_for_command('cmd1', ['app1', 'app2', 'app3'])
-
-        """
-        _check_type(application_ids, list)
-        path = self.path_command + '/' + command_id + '/applications'
-        _call(path, method='PUT', data=application_ids, raise_not_status=204)
-
-    def remove_application_for_command(self, command_id, application_id):
-        """
-        Remove applications for a command.
-
-        Args:
-            command_id (str): the command id
-            application_id (str): the application to remove
-
-        Returns: None
-
-        Example:
-            >>> remove_application_for_command('cmd1', 'app1')
-
-        """
-        path = self.path_command + '/' + command_id + '/applications' + '/' \
-            + application_id
-        _call(path, method='DELETE', raise_not_status=204)
-
-    def get_clusters_for_command(self, command_id, status=None):
-        """
-        Get commands for a cluster.
-
-        Args:
-            command_id (str): the command id
-            status (optional[str]): filter by this cluster status. Valid
-                parameters are UP, OUT_OF_SERVICE, and TERMINATED
-
-        Returns:
-            list: the clusters
-
-        Examples:
-            >>> get_clusters_for_command('cmd1')
-            >>> [{'name':'cluster1'}, {'name':'cluster2'}]
-
-            >>> get_clusters_for_command('cmd1', status='UP')
-            >>> [{'name':'cluster2'}]
-
-        """
-        _verify_filters(status, ['UP', 'OUT_OF_SERVICE', 'TERMINATED'])
-        path = self.path_command + '/' + command_id + '/clusters'
-        params = {'status': status}
-        resp = _call(path, none_on_404=True, params=params) or {}
-
-        return resp.get('response')
-
-    def remove_all_configs_for_command(self, command_id):
-        """
-        Remove all configs for a command.
-
-        Args:
-            command_id (str): the command id
-
-        Returns: None
-
-        Example:
-            >>> remove_all_command_configs('cmd1')
-
-        """
-        path = self.path_command + '/' + command_id
-        _call(path, method='DELETE', raise_not_status=204)
-
-    def get_configs_for_command(self, command_id):
-        """
-        Get configs for a command.
-
-        Args:
-            command_id (str): the command id
-
-        Returns:
-            list: the configs for a command
-
-        Example:
-            >>> get_configs_for_command('cmd1')
-            >>> [{'id':'test'}, {'id':'test2'}]
-        """
-
-        path = self.path_command + '/' + command_id + '/configs'
-        resp = _call(path, none_on_404=True) or {}
-
-        return resp.get('response')
-
-    def add_configs_for_command(self, command_id, configs):
-        """
-        Add configs for a command.
-
-        Args:
-            command_id (str): the command id
-            configs (list): the configs to add
-
-        Returns: None
-
-        Example:
-            >>> add_configs_for_command('cmd1', ['conf1', 'conf2'])
-
-        """
-        _check_type(configs, list)
-        path = self.path_command + '/' + command_id
-        _call(path, method='POST', data=configs, raise_not_status=204)
-
-    def update_configs_for_command(self, command_id, configs):
-        """
-        Update configs for a command.
-
-        Args:
-            command_id (str): the command id
-            configs (list): the configs to update
-
-        Returns: None
-
-        Example:
-            >>> update_configs_for_command('cmd1', ['conf1', 'conf2'])
-
-        """
-        _check_type(configs, list)
-        path = self.path_command + '/' + command_id
-        _call(path, method='PUT', data=configs, raise_not_status=204)
-
-    def remove_all_tags_for_command(self, command_id):
-        """
-        Remove all tags for a command.
-
-        Args:
-            command_id (str): the command id
-
-        Returns: None
-
-        Example:
-            >>> remove_all_tags_for_command('cmd1')
-
-        """
-        path = self.path_command + '/' + command_id + '/tags'
-        _call(path, method='DELETE', raise_not_status=204)
-
-    def get_tags_for_command(self, command_id):
-        """
-        Get tags for a command.
-
-        Args:
-            command_id (str): the command id
-
-        Returns:
-            list: the tags for the command
-
-        Example:
-            >>> get_tags_for_command('cmd1')
-            >>> ['test:true', 'prod:false']
-
-        """
-        path = self.path_command + '/' + command_id + '/tags'
-        resp = _call(path, none_on_404=True) or {}
-
-        return resp.get('response', [])
-
-    def add_tags_for_command(self, command_id, tags):
-        """
-        Add tags to a command.
-
-        Args:
-            command_id (str); the command i
-
-        Returns: None
-
-        Example:
-            >>> add_tags_for_command('cmd1', ['test:true', 'prod:false'])
-
-        """
-        _check_type(tags, list)
-        path = self.path_command + '/' + command_id
-        _call(path, method='POST', data=tags, raise_not_status=204)
-
-    def update_tags_for_command(self, command_id, tags):
-        """
-        Update tags for a command.
-
-        Args:
-            command_id (str): the command id
-            tags (list): the tags to update
-
-        Returns: None
-
-        Example:
-            >>> add_tags_for_command('cmd1', ['prod:true'])
-
-        """
-        _check_type(tags, list)
-        path = self.path_command + '/' + command_id
-        _call(path, method='PUT', data=tags, raise_not_status=204)
-
-    def remove_tags_for_command(self, command_id, tag):
-        """
-        Remove tag for command.
-
-        Args:
-            command_id (str): the command id
-            tag (str): the tag to remove
-
-        Returns: None
-
-        Example:
-            >>> remove_tags_for_command('cmd1', ['test:true'])
-
-        """
-        path = self.path_command + '/' + command_id + '/' + tag
-        _call(path, method='DELETE', raise_not_status=204)
-
     def get_jobs(self, filters=None, req_size=1000):
         """
         Get jobs. This command makes pages through results from Genie and will
@@ -1824,34 +1664,6 @@ class Genie(object):
 
         if resp.get('response'):
             return DotDict(resp.get('response'))
-
-    def patch_job(self, job_id, patches):
-        """
-        Patch an job.
-
-        Note:
-            A patch is a dictionary that has the following three required keys:
-                - op (str): the operation
-                - path (str): the path to apply the patch. E.g. "/version"
-                - value (str): the value to apply. E.g. "1.1"
-
-        Args:
-            job_id (str): the job id
-            patches (list): a list of patches to apply.
-
-        Returns: None
-
-        Example:
-            >>> patch1 = {'op': 'replace', 'path': '/version', 'value': '1.1'}
-            >>> patch_job('job1', [patch1])
-
-        """
-        _check_type(patches, list)
-        for patch in patches:
-            _check_patch_operation(patch.get('op', 'NOTSET'))
-
-        path = self.path_job + '/' + job_id
-        _call(path, data=patches, method='PATCH')
 
     def get_job_applications(self, job_id):
         """
@@ -1977,7 +1789,6 @@ class Genie(object):
 
         if resp:
             return resp.get('response')
-
 
     def get_job_status(self, job_id):
         """

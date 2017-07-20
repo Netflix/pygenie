@@ -22,7 +22,7 @@ GENIE_URL = GENIE_CONF.genie.url
 # Used to generate basic responses from genie
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
 class TestGenie(unittest.TestCase):
-    "Test related to the bdp EMR library"
+    """Test related to the bdp EMR library"""
 
     def setUp(self):
         self.genie = Genie(GENIE_CONF)
@@ -81,6 +81,7 @@ class TestCommand(unittest.TestCase):
             "name": "presto",
             "description": None,
             "configs": [],
+            "dependencies": [],
             "setupFile": None,
             "status": "ACTIVE",
             "executable": "sleep 1",
@@ -158,6 +159,11 @@ class TestCommand(unittest.TestCase):
         self.genie.add_configs_for_command(self.command['id'], ['test'])
 
     @responses.activate
+    def test_add_dependencies_for_command(self):
+        responses.add(responses.POST, self.path, status=204)
+        self.genie.add_dependencies_for_command(self.command['id'], ['test'])
+
+    @responses.activate
     def test_add_tags_for_command(self):
         responses.add(responses.POST, self.path, status=204)
         self.genie.add_tags_for_command(self.command['id'], ['tag:test'])
@@ -183,6 +189,13 @@ class TestCommand(unittest.TestCase):
         assert "conf1" in configs, "did not return the right configs"
 
     @responses.activate
+    def test_get_dependencies_for_command(self):
+        responses.add(responses.GET, self.path, body='["dep1", "dep2"]')
+        dependencies = self.genie.get_dependencies_for_command(self.command['id'])
+        assert len(dependencies) == 2, "Did not return enough dependencies"
+        assert "dep1" in dependencies, "Did not return the right dependencies"
+
+    @responses.activate
     def test_get_tags_for_command(self):
         responses.add(responses.GET, self.path, body='["tag:1", "tag:2"]')
         tags = self.genie.get_tags_for_command(self.command['id'])
@@ -200,6 +213,11 @@ class TestCommand(unittest.TestCase):
         self.genie.remove_all_configs_for_command(self.command['id'])
 
     @responses.activate
+    def test_remove_all_dependencies_for_command(self):
+        responses.add(responses.DELETE, self.path, status=204)
+        self.genie.remove_all_dependencies_for_command(self.command['id'])
+
+    @responses.activate
     def test_remove_all_tags_for_command(self):
         responses.add(responses.DELETE, self.path, status=204)
         self.genie.remove_all_tags_for_command(self.command['id'])
@@ -210,9 +228,9 @@ class TestCommand(unittest.TestCase):
         self.genie.remove_application_for_command(self.command['id'], 'test')
 
     @responses.activate
-    def test_remove_tags_for_command(self):
+    def test_remove_tag_for_command(self):
         responses.add(responses.DELETE, self.path, status=204)
-        self.genie.remove_tags_for_command(self.command['id'], 'test')
+        self.genie.remove_tag_for_command(self.command['id'], 'test')
 
     @responses.activate
     def test_set_application_for_command(self):
@@ -223,6 +241,11 @@ class TestCommand(unittest.TestCase):
     def test_update_configs_for_command(self):
         responses.add(responses.PUT, self.path, status=204)
         self.genie.update_configs_for_command('test', ['conf1', 'conf2'])
+
+    @responses.activate
+    def test_update_dependencies_for_command(self):
+        responses.add(responses.PUT, self.path, status=204)
+        self.genie.update_dependencies_for_command('test', ['dep1', 'dep2'])
 
     @responses.activate
     def test_update_tags_for_command(self):
@@ -271,12 +294,22 @@ class TestApplication(unittest.TestCase):
     @responses.activate
     def test_remove_all_application_configs(self):
         responses.add(responses.DELETE, self.path, status=204)
-        self.genie.remove_all_application_configs(self.application['id'])
+        self.genie.remove_all_configs_for_application(self.application['id'])
+
+    @responses.activate
+    def test_remove_all_configs_for_application(self):
+        responses.add(responses.DELETE, self.path, status=204)
+        self.genie.remove_all_configs_for_application(self.application['id'])
+
+    @responses.activate
+    def test_remove_all_dependencies_for_application(self):
+        responses.add(responses.DELETE, self.path, status=204)
+        self.genie.remove_all_dependencies_for_application(self.application['id'])
 
     @responses.activate
     def test_update_application(self):
         responses.add(responses.PUT, self.path, status=204)
-        self.genie.delete_application(self.application['id'], self.application)
+        self.genie.update_application(self.application)
 
     @responses.activate
     def test_patch_application(self):
@@ -298,17 +331,30 @@ class TestApplication(unittest.TestCase):
         assert_equals(cluster, None)
 
     @responses.activate
-    def test_tags_for_application(self):
+    def test_get_configs_for_application(self):
+        configs = ['conf1', 'conf2', 'conf3']
+        responses.add(responses.GET, self.path, body=json.dumps(configs))
+        new_configs = self.genie.get_configs_for_application(self.application['id'])
+        assert_equals(configs, new_configs)
+
+    @responses.activate
+    def test_get_dependencies_for_application(self):
+        dependencies = ['dep1', 'dep2', 'dep3']
+        responses.add(responses.GET, self.path, body=json.dumps(dependencies))
+        new_dependencies = self.genie.get_dependencies_for_application(self.application['id'])
+        assert_equals(dependencies, new_dependencies)
+
+    @responses.activate
+    def test_get_tags_for_application(self):
         tags = ['test:true', 'region:us-east-1', 'tag:very-long-tag-name']
         responses.add(responses.GET, self.path, body=json.dumps(tags))
-        new_tags = self.genie.get_application(self.application['id'])
+        new_tags = self.genie.get_tags_for_application(self.application['id'])
         assert_equals(tags, new_tags)
 
     @responses.activate
     def test_update_application(self):
         responses.add(responses.PUT, self.path, status=204)
         self.genie.update_application(self.application)
-
 
     @responses.activate
     def test_update_configs_for_application(self):
@@ -329,16 +375,27 @@ class TestApplication(unittest.TestCase):
                                                ['tag:test', 'genie:true'])
 
     @responses.activate
+    def test_add_configs_for_application(self):
+        responses.add(responses.POST, self.path, status=204)
+        self.genie.add_configs_for_application(self.application['id'],
+                                                    ['conf1', 'conf2'])
+
+    @responses.activate
     def test_add_dependencies_for_application(self):
         responses.add(responses.POST, self.path, status=204)
         self.genie.add_dependencies_for_application(self.application['id'],
-                                                    ['conf1', 'conf2'])
+                                                    ['dep1', 'dep2'])
 
     @responses.activate
     def test_add_tags_for_application(self):
         responses.add(responses.POST, self.path, status=204)
         self.genie.add_tags_for_application(self.application['id'],
                                             ['tag:test', 'genie:true'])
+
+    @responses.activate
+    def test_remove_all_configs_for_application(self):
+        responses.add(responses.DELETE, self.path, status=204)
+        self.genie.remove_all_configs_for_application(self.application['id'])
 
     @responses.activate
     def test_remove_all_dependencies_for_application(self):
@@ -353,7 +410,7 @@ class TestApplication(unittest.TestCase):
     @responses.activate
     def test_remove_tag_for_application(self):
         responses.add(responses.DELETE, self.path, status=204)
-        self.genie.remove_tag_for_application(self.application['id'], ['tag:true'])
+        self.genie.remove_tag_for_application(self.application['id'], 'tag:true')
 
     @responses.activate
     def test_get_commands_for_application(self):
@@ -361,20 +418,6 @@ class TestApplication(unittest.TestCase):
         responses.add(responses.GET, self.path, body=json.dumps(cmds))
         commands = self.genie.get_commands_for_application(self.application['id'])
         assert_equals(cmds, commands)
-
-    @responses.activate
-    def test_get_configs_for_application(self):
-        confs = [{'id': 'test1'}, {'id':'test2', 'name':'test'}]
-        responses.add(responses.GET, self.path, body=json.dumps(confs))
-        configs = self.genie.get_configs_for_application(self.application['id'])
-        assert_equals(confs, configs)
-
-    @responses.activate
-    def test_get_dependencies_for_application(self):
-        deps = [{'id': 'test1'}, {'id':'test2', 'name':'test'}]
-        responses.add(responses.GET, self.path, body=json.dumps(deps))
-        dependencies = self.genie.get_dependencies_for_application(self.application['id'])
-        assert_equals(deps, dependencies)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -393,6 +436,7 @@ class TestCluster(unittest.TestCase):
             "name": "testcluster",
             "description": "Test Cluster",
             "configs": [],
+            "dependencies": [],
             "setupFile": "s3://test-bucket/cluster.sh",
             "status": "UP",
             "page": {
@@ -443,6 +487,10 @@ class TestCluster(unittest.TestCase):
         responses.add(responses.POST, self.path, status=204)
         self.genie.add_configs_for_cluster(self.cluster['id'], ['c1', 'c2'])
 
+    @responses.activate
+    def test_add_dependencies_for_cluster(self):
+        responses.add(responses.POST, self.path, status=204)
+        self.genie.add_dependencies_for_cluster(self.cluster['id'], ['d1', 'd2'])
 
     @responses.activate
     def test_add_tags_for_cluster(self):
@@ -485,6 +533,11 @@ class TestCluster(unittest.TestCase):
         self.genie.remove_all_configs_for_cluster(self.cluster['id'])
 
     @responses.activate
+    def test_remove_all_dependencies_for_cluster(self):
+        responses.add(responses.DELETE, self.path, status=204)
+        self.genie.remove_all_dependencies_for_cluster(self.cluster['id'])
+
+    @responses.activate
     def test_remove_all_tags_for_cluster(self):
         responses.add(responses.DELETE, self.path, status=204)
         self.genie.remove_all_tags_for_cluster(self.cluster['id'])
@@ -523,6 +576,12 @@ class TestCluster(unittest.TestCase):
         self.genie.update_configs_for_cluster(self.cluster['id'], confs)
 
     @responses.activate
+    def test_update_dependencies_for_cluster(self):
+        responses.add(responses.PUT, self.path, status=204)
+        dependencies = [{'id': 'test'}, {'id': 'test2'}]
+        self.genie.update_dependencies_for_cluster(self.cluster['id'], dependencies)
+
+    @responses.activate
     def test_update_tags_for_cluster(self):
         responses.add(responses.PUT, self.path, status=204)
         tags = ['test:true', 'version:1.0', 'prod:false']
@@ -553,6 +612,8 @@ class TestJob(unittest.TestCase):
             "clusterName": "test_cluster",
             "commandName": "test_command",
             "runtime": "TEST005",
+            "dependencies": [],
+            "configs": [],
         }
 
     @responses.activate
@@ -616,27 +677,22 @@ class TestJob(unittest.TestCase):
         new_status = self.genie.get_job_status(self.job['id'])
         assert_equals(status, new_status)
 
-    @responses.activate
-    def test_patch_job(self):
-        patch1 = {'op': 'replace', 'path': '/version', 'value': '1.1'}
-        patch2 = {'op': 'replace', 'path': '/user', 'value': 'test'}
-        responses.add(responses.PATCH, self.path)
-        self.genie.patch_job(self.job['id'], [patch1, patch2])
-
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
 class TestGeniepyAPI(unittest.TestCase):
-    "Test that all required APIs are available through geniepy"
+    """Test that all required APIs are available through geniepy"""
 
     def setUp(self):
         self.genie = Genie(GENIE_CONF)
         self.required_apis = [
             'add_applications_for_command',
             'add_commands_for_cluster',
+            'add_configs_for_application',
             'add_configs_for_cluster',
             'add_configs_for_command',
-            'add_configs_to_application',
             'add_dependencies_for_application',
+            'add_dependencies_for_cluster',
+            'add_dependencies_for_command',
             'add_tags_for_application',
             'add_tags_for_cluster',
             'add_tags_for_command',
@@ -649,7 +705,6 @@ class TestGeniepyAPI(unittest.TestCase):
             'delete_application',
             'delete_cluster',
             'delete_command',
-            'get_all_configs_for_cluster',
             'get_application',
             'get_applications',
             'get_applications_for_command',
@@ -660,8 +715,11 @@ class TestGeniepyAPI(unittest.TestCase):
             'get_commands',
             'get_commands_for_cluster',
             'get_configs_for_application',
+            'get_configs_for_cluster',
             'get_configs_for_command',
             'get_dependencies_for_application',
+            'get_dependencies_for_cluster',
+            'get_dependencies_for_command',
             'get_job_applications',
             'get_job_cluster',
             'get_job_command',
@@ -675,12 +733,14 @@ class TestGeniepyAPI(unittest.TestCase):
             'patch_application',
             'patch_cluster',
             'patch_command',
-            'remove_all_application_configs',
             'remove_all_applications_for_command',
             'remove_all_commands_for_cluster',
+            'remove_all_configs_for_application',
             'remove_all_configs_for_cluster',
             'remove_all_configs_for_command',
             'remove_all_dependencies_for_application',
+            'remove_all_dependencies_for_cluster',
+            'remove_all_dependencies_for_command',
             'remove_all_tags_for_application',
             'remove_all_tags_for_cluster',
             'remove_all_tags_for_command',
@@ -689,7 +749,7 @@ class TestGeniepyAPI(unittest.TestCase):
             'remove_tag_for_application',
             'remove_tag_for_cluster',
             'remove_tag_for_cluster',
-            'remove_tags_for_command',
+            'remove_tag_for_command',
             'set_application_for_command',
             'set_commands_for_cluster',
             'submit_job',
@@ -707,7 +767,7 @@ class TestGeniepyAPI(unittest.TestCase):
         ]
 
     def test_available_apis(self):
-        "Test that all required APIs are available by the library"
+        """Test that all required APIs are available by the library"""
         missing = []
         for api in self.required_apis:
             if not hasattr(self.genie, api):
@@ -715,8 +775,9 @@ class TestGeniepyAPI(unittest.TestCase):
         if missing:
             self.fail('Missing required apis: %s' % missing)
 
+
 def main():
-    "Run the BdpMaint unit tests"
+    """Run the pygenie unit tests"""
     unittest.main()
 
 if __name__ == '__main__':
