@@ -527,7 +527,7 @@ class Genie(object):
 
         Args:
             application_id (str): the application id
-            tag (list): the tag to remove from the application
+            tag (str): the tag to remove from the application
 
         Returns: None
 
@@ -952,7 +952,7 @@ class Genie(object):
 
         Args:
             command_id (str): the command id
-            tag (list): the tag to remove from the command
+            tag (str): the tag to remove from the command
 
         Returns: None
 
