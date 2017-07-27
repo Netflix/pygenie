@@ -527,15 +527,14 @@ class RunningJob(object):
         stderr_part = ''
 
         if self.__reload_stderr:
-            range_start = 0 if self._cached_stderr is None else len(self._cached_stderr)
+            headers = {'Range': 'bytes={}-'.format(len(self._cached_stderr))} \
+                if self._cached_stderr else None
 
-            logger.debug('getting stderr (Range: bytes=%s-', range_start)
+            logger.debug('getting stderr (headers -> %s)', headers)
 
             stderr_part = self._adapter.get_stderr(
                 self._job_id,
-                headers={
-                    'Range': 'bytes={}-'.format(range_start)
-                },
+                headers=headers,
                 **kwargs
             )
 
