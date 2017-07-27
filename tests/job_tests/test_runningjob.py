@@ -423,7 +423,7 @@ class TestingRunningStderr(unittest.TestCase):
 
         assert_equals(
             [
-                call('1234-update-stderr', headers={'Range': 'bytes=0-'}),
+                call('1234-update-stderr', headers=None),
                 call('1234-update-stderr', headers={'Range': 'bytes=12-'}),
                 call('1234-update-stderr', headers={'Range': 'bytes=24-'})
             ],
@@ -458,7 +458,7 @@ class TestingRunningStderr(unittest.TestCase):
 
             get_stderr.assert_called_with(
                 '1234-stderr-running',
-                headers={'Range': 'bytes={}-'.format(start)})
+                headers={'Range': 'bytes={}-'.format(start)} if start > 0 else None)
 
         assert_equals(36, len(running_job._cached_stderr))
 
@@ -496,3 +496,37 @@ class TestingRunningStderr(unittest.TestCase):
             ],
             write_to_stream.call_args_list
         )
+
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stderr')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
+    def test_stderr_running_zero_bytes(self, get_status, get_stderr):
+        """Test RunningJob().stderr() for running job (0 stderr bytes)."""
+
+        # Should never set Range header when 0 cached stderr bytes
+
+        stderr = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        ]
+
+        get_status.return_value = 'RUNNING'
+        get_stderr.side_effect = stderr
+
+        running_job = pygenie.jobs.RunningJob('1234-stderr-running-zero-bytes',
+                                              info={'status': 'RUNNING'})
+
+        assert_equals(None, running_job._cached_stderr)
+
+        for i in stderr:
+            running_job.stderr()
+
+            get_stderr.assert_called_with(
+                '1234-stderr-running-zero-bytes',
+                headers=None)
+
+        assert_equals('', running_job._cached_stderr)
