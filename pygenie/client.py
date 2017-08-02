@@ -1636,7 +1636,7 @@ class Genie(object):
 
 
             # Break if we're at the end
-            if (resp['page']['totalPages']) == (resp['page']['number'] + 1):
+            if (resp['page']['totalPages']) <= (resp['page']['number'] + 1):
                 break
 
             # On to the next iteration
