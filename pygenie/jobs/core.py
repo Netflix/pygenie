@@ -160,6 +160,7 @@ class GenieJob(object):
         self._command_arguments = None
         self._command_options = defaultdict(OrderedDict)
         self._command_tags = list()
+        self._configs = list()
         self._dependencies = list()
         self._description = None
         self._email = None
@@ -202,6 +203,15 @@ class GenieJob(object):
 
         if dep not in self._dependencies:
             self._dependencies.append(dep)
+
+    def _add_config(self, config):
+        """
+        Add a config to the job. Will not add if the config is already
+        added.
+        """
+
+        if config not in self._configs:
+            self._configs.append(config)
 
     @unicodify
     def _add_cluster_tag(self, tags, priority=0):
@@ -365,6 +375,27 @@ class GenieJob(object):
 
     @arg_list
     @add_to_repr('append')
+    def configs(self, _configs):
+        """
+        Add a configuration file to the Genie job.
+
+        Example:
+            >>> job = GenieJob() \\
+            ...     .configs('/path/to/config_file_1') \\
+            ...     .configs(['/path/to/config_file_2',
+            ...                    '/path/to/config_file_3'])
+            >>> print(job.to_dict().get('configs'))
+            ['/path/to/config_file_1', '/path/to/config_file_2', '/path/to/config_file_3']
+
+        Args:
+            _configs (str, list): Path to a configuration file for the job.
+
+        Returns:
+            :py:class:`GenieJob`: self
+        """
+
+    @arg_list
+    @add_to_repr('append')
     def dependencies(self, _dependencies):
         """
         Add a file dependency for the Genie job.
@@ -392,7 +423,7 @@ class GenieJob(object):
         Sets the description for the job.
 
         Args:
-            description (str): The job description.
+            _description (str): The job description.
 
         Returns:
             :py:class:`GenieJob`: self
