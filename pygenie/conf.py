@@ -96,15 +96,23 @@ class GenieConf(object):
     """
     Stores configuration options for using Genie by reading command line,
     configuration files, and environment variables.
+
+    The configuration file is loaded in the following order:
+
+        1. config_file parameter if set
+        2. OR GENIEC_CONFIG os env variable if set
+        3. OR from ~/.genie/genie.ini if exists
     """
 
-    def __init__(self):
+    def __init__(self, config_file=None):
         self._config_files = list()
 
         # genie section is first-class section
         self.genie = GenieConfSection(name='genie')
 
-        if self.config_file_env():
+        if config_file:
+            self.load_config_file(config_file)
+        elif self.config_file_env():
             self.load_config_file(self.config_file_env())
         elif self.config_file_home_ini():
             self.load_config_file(self.config_file_home_ini())
