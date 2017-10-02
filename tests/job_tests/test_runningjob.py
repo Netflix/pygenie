@@ -323,6 +323,22 @@ class TestingRunningJobProperties(unittest.TestCase):
             values
         )
 
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
+    def test_get_runningjob_command_data(self, get_info):
+        """Test getting RunningJob.command_data."""
+
+        expected = {'version' : '1.6.1', 'name':'prodsparksubmit'}
+        get_info.return_value = {'command_data': expected}
+        running_job = pygenie.jobs.RunningJob('rj-command_data')
+        actual = running_job.command_data
+
+        get_info.assert_called_once_with(u'rj-command_data', command=True)
+
+        assert_equals(
+            expected,
+            actual
+        )
+
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     def test_get_runningjob_status(self, get_status):
         """Test getting RunningJob.status."""
