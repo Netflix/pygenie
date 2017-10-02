@@ -484,6 +484,20 @@ class RunningJob(object):
         """
 
     @property
+    @get_from_info('command_data', info_section='command')
+    def command_data(self):
+        """
+        Get JSON of the command object set by Genie.
+
+        Example:
+            >>> running_job.command_data
+            {...}
+
+        Returns:
+            dict: JSON of the command object.
+        """
+
+    @property
     def start_time(self):
         """
         Get the job's start epoch time (milliseconds).

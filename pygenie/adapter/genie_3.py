@@ -322,6 +322,7 @@ class Genie3Adapter(GenieBaseAdapter):
 
             ret['command_id'] = command_data.get('id')
             ret['command_name'] = command_data.get('name')
+            ret['command_data'] = command_data
 
         if execution or get_all:
             execution_data = self.get(job_id,
