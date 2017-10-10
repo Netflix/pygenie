@@ -381,6 +381,7 @@ class TestingRunningJobProperties(unittest.TestCase):
         ]
         get_info.side_effect = [
             {'status_msg': 'job is running'},
+            {'status_msg': 'job is running'},
             {'status_msg': 'job finished successfully'}
         ]
 
@@ -396,6 +397,7 @@ class TestingRunningJobProperties(unittest.TestCase):
             get_info.call_args_list,
             [
                 call(u'rj-status_msg', job=True),
+                call(u'rj-status_msg', job=True),
                 call(u'rj-status_msg', job=True)
             ]
         )
@@ -403,7 +405,7 @@ class TestingRunningJobProperties(unittest.TestCase):
         assert_equals(
             [
                 'job is running',
-                'job finished successfully',
+                'job is running',
                 'job finished successfully'
             ],
             values

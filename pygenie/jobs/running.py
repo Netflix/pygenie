@@ -63,7 +63,8 @@ def get_from_info(info_key, info_section, update_if_running=False):
                 self._update_info(info_section)
             elif update_if_running:
                 # don't get status unless have to to limit HTTP requests
-                status = (self.status or 'INIT').upper()
+                #look for status in the info object to avoid caching stale data
+                status = self.info.get('status') or (self.status or 'INIT').upper()
                 if status in RUNNING_STATUSES:
                     self._update_info(info_section)
 
