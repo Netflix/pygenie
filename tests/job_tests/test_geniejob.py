@@ -4,7 +4,7 @@ import os
 import unittest
 
 from mock import patch
-from nose.tools import assert_equals, assert_raises
+from nose.tools import assert_equals, assert_raises, assert_true
 
 import pygenie
 
@@ -305,64 +305,26 @@ class TestingJobExecute(unittest.TestCase):
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
 class TestingSetJobName(unittest.TestCase):
-    """Test setting job name from script."""
+    """Test setting job name with script name or a query string."""
 
-    def test_set_job_name(self):
-        """Test setting job name from script contents."""
+    def test_set_job_name_script(self):
+        """Test setting job name from script file name."""
 
         assert_equals(
-            {'name': 'SELECT * FROM db.table'},
-            set_jobname(pygenie.jobs.PrestoJob() \
-                .script('SELECT * FROM db.table'))
+            {'name': 'user.HiveJob.Script.FILE_NAME'},
+            set_jobname(pygenie.jobs.HiveJob() \
+                .script('s3://path/to/file/file_name.hive').username('user'))
         )
 
-    def test_set_job_name_truncate(self):
-        """Test setting job name from script contents (with truncate)."""
+    def test_set_job_name_query(self):
+        """Test setting job name for query string set as script"""
 
-        job_name = set_jobname(
-            pygenie.jobs.PrestoJob()\
-                .script(''.join([str(i) for i in range(100)]))
-        ).get('name') or ''
-
-        assert_equals(
-            40,
-            len(job_name)
-        )
-
-    def test_set_job_name_newline(self):
-        """Test setting job name from script contents (with newline)."""
-
-        assert_equals(
-            {'name': 'SELECT * FROM db.table'},
+        assert_true(
+            'user.PrestoJob.Query' in
             set_jobname(pygenie.jobs.PrestoJob() \
-                .script("SELECT\n*\nFROM\ndb.table"))
-        )
-
-    def test_set_job_name_parameter(self):
-        """Test setting job name from script contents (with parameter)."""
-
-        assert_equals(
-            {'name': 'SELECT * FROM db.{table}'},
-            set_jobname(pygenie.jobs.PrestoJob() \
-                .script("SELECT * FROM db.${table}"))
-        )
-
-    def test_set_job_name_semicolon(self):
-        """Test setting job name from script contents (with semicolon)."""
-
-        assert_equals(
-            {'name': 'SELECT * FROM db.table'},
-            set_jobname(pygenie.jobs.PrestoJob() \
-                .script("SELECT * FROM db.table;"))
-        )
-
-    def test_set_job_name_quotes(self):
-        """Test setting job name from script contents (with quotes)."""
-
-        assert_equals(
-            {'name': 'min(values) r = foo order by date, hour'},
-            set_jobname(pygenie.jobs.PrestoJob() \
-                .script("min(\"values\") r = 'foo' order by date, hour;"))
+                        .script('select * from db.table').username('user')).get(
+                'name', ''
+            )
         )
 
 

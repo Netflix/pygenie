@@ -4,6 +4,7 @@ import unittest
 
 from mock import call, patch
 from nose.tools import (assert_equals,
+                        assert_true,
                         assert_raises)
 
 from pygenie.conf import GenieConf
@@ -138,13 +139,12 @@ class TestGenie3Adapter(unittest.TestCase):
 
         job = PrestoJob() \
             .script('select * from ${table}') \
-            .parameter('table', 'foo.fizz')
+            .parameter('table', 'foo.fizz').username('test')
 
         payload = get_payload(job)
 
-        assert_equals(
-            'select * from {table}',
-            payload['name']
+        assert_true(
+            'test.PrestoJob.Query' in payload['name']
         )
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get')
