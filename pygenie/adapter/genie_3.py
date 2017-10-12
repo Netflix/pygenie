@@ -11,6 +11,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 import logging
 import os
+import time
 
 from functools import wraps
 from multipledispatch import dispatch
@@ -64,15 +65,16 @@ def set_jobname(func):
         # handle job name if not set
         if not job.get('job_name') and script:
             if is_file(script):
-                payload['name'] = os.path.basename(script)
+                script_name = os.path.splitext(os.path.basename(script))[0]
+                payload['name'] = "{}.{}.Script.{}".format(
+                    job.get('username'),
+                    job.__class__.__name__,
+                    script_name.upper())
             else:
-                payload['name'] = script \
-                    .replace('${', '{') \
-                    .replace(';', '') \
-                    .replace('"', '') \
-                    .replace("'", "") \
-                    .replace('\n', ' ')[:40] \
-                    .strip()
+                payload['name'] = "{}.{}.Query.{}".format(
+                    job.get('username'),
+                    job.__class__.__name__,
+                    int(time.time()*1000))
 
         return payload
 
