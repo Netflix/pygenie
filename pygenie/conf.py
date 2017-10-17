@@ -16,6 +16,7 @@ Below is the order of loading config values (first = higher priority):
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from copy import copy
 import json
 import logging
 import os
@@ -52,6 +53,18 @@ class GenieConfSection(object):
                 "'{}' does not exist in loaded options for '{}' section ({})" \
                 .format(attr, self.__name, sorted(self.to_dict().keys())))
         return self.to_dict().get(attr)
+
+    def __copy__(self):
+        g = GenieConfSection(self.__name)
+        for k,v in self.to_dict().iteritems():
+            g.set(k,v)
+        return g
+
+    def __deepcopy__(self, memo=False):
+        g = GenieConfSection(copy(self.__name))
+        for k,v in self.to_dict().iteritems():
+            g.set(copy(k), copy(v))
+        return g
 
     def __get_env(self, attr):
         return os.environ.get('{}_{}'.format(self.__name, attr))
@@ -123,6 +136,20 @@ class GenieConf(object):
         if attr not in self.to_dict():
             return GenieConfSection(attr)
         return self.to_dict().get(attr)
+
+    def __copy__(self):
+        g = GenieConf()
+        for k,v in self.to_dict().iteritems():
+            gg = getattr(g, k)
+            if isinstance(gg, GenieConfSection):
+                for kk,vv in v.iteritems():
+                    gg.set('{k}.{kk}', copy(vv))
+            else:
+                g.setattr(copy(k), copy(v))
+        return g
+
+    def __deepcopy__(self, memo=False):
+        return self.__copy__()
 
     def __repr__(self):
         return '.'.join(['{}()'.format(self.__class__.__name__)] + \
