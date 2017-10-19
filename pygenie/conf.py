@@ -54,17 +54,21 @@ class GenieConfSection(object):
                 .format(attr, self.__name, sorted(self.to_dict().keys())))
         return self.to_dict().get(attr)
 
+    # Fix issues copying: https://bugs.python.org/issue19364
     def __copy__(self):
         g = GenieConfSection(self.__name)
         for k,v in self.to_dict().iteritems():
             g.set(k,v)
         return g
-
     def __deepcopy__(self, memo=False):
         g = GenieConfSection(copy(self.__name))
         for k,v in self.to_dict().iteritems():
             g.set(copy(k), copy(v))
         return g
+
+    # Fix issues pickling: https://stackoverflow.com/questions/2049849/why-cant-i-pickle-this-object
+    def __getstate__(self): return self.__dict__
+    def __setstate__(self, d): self.__dict__.update(d)
 
     def __get_env(self, attr):
         return os.environ.get('{}_{}'.format(self.__name, attr))
@@ -137,6 +141,7 @@ class GenieConf(object):
             return GenieConfSection(attr)
         return self.to_dict().get(attr)
 
+    # Fix issues copying: https://bugs.python.org/issue19364
     def __copy__(self):
         g = GenieConf()
         for k,v in self.to_dict().iteritems():
@@ -147,9 +152,12 @@ class GenieConf(object):
             else:
                 g.setattr(copy(k), copy(v))
         return g
-
     def __deepcopy__(self, memo=False):
         return self.__copy__()
+
+    # Fix issues pickling: https://stackoverflow.com/questions/2049849/why-cant-i-pickle-this-object
+    def __getstate__(self): return self.__dict__
+    def __setstate__(self, d): self.__dict__.update(d)
 
     def __repr__(self):
         return '.'.join(['{}()'.format(self.__class__.__name__)] + \
