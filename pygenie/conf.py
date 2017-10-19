@@ -45,6 +45,7 @@ class GenieConfSection(object):
         self.__name = name
 
     def __getattr__(self, attr):
+        if attr.startswith('__'): raise AttributeError
         if attr not in self.to_dict():
             env = self.__get_env(attr)
             if env is not None:
@@ -137,6 +138,7 @@ class GenieConf(object):
             self._load_options()
 
     def __getattr__(self, attr):
+        if attr.startswith('__'): raise AttributeError
         if attr not in self.to_dict():
             return GenieConfSection(attr)
         return self.to_dict().get(attr)
