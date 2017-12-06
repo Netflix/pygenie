@@ -296,16 +296,18 @@ class TestStringToList(unittest.TestCase):
 class TestReattachJob(unittest.TestCase):
     """Test reattaching to a running job."""
 
+    @patch('pygenie.jobs.running.RunningJob.update')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
-    def test_reattaching_job(self, get_status):
+    def test_reattaching_job(self, get_status, update):
         """Test reattaching to a running job."""
 
         running_job = reattach_job('test-reattach-job')
 
         get_status.assert_called_once_with('test-reattach-job')
 
+    @patch('pygenie.jobs.running.RunningJob.update')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
-    def test_reattaching_job_does_not_exist(self, get_status):
+    def test_reattaching_job_does_not_exist(self, get_status, update):
         """Test reattaching to a running job that does not exist."""
 
         get_status.side_effect = GenieJobNotFoundError

@@ -36,7 +36,8 @@ INFO_SECTIONS = {
     'command',
     'execution',
     'job',
-    'request'
+    'request',
+    'output'
 }
 
 
@@ -63,8 +64,7 @@ def get_from_info(info_key, info_section, update_if_running=False):
                 self._update_info(info_section)
             elif update_if_running:
                 # don't get status unless have to to limit HTTP requests
-                #look for status in the info object to avoid caching stale data
-                status = self.info.get('status') or (self.status or 'INIT').upper()
+                status = (self.status or 'INIT').upper()
                 if status in RUNNING_STATUSES:
                     self._update_info(info_section)
 
@@ -531,7 +531,12 @@ class RunningJob(object):
         """
 
         if (self._status is None) or (self._status in RUNNING_STATUSES):
+            last_known_status = self._status
             self._status = self._adapter.get_status(self._job_id).upper()
+            if last_known_status != self._status:
+                #update the info cache
+                self.update(info_section='job')
+                self.update(info_section='output')
             self._info['status'] = self._status
 
         return self._status.upper() if self._status else None
@@ -756,3 +761,90 @@ class RunningJob(object):
             self._write_to_stream(self._update_stderr())
 
         self._write_to_stream(self._update_stderr())
+
+    @property
+    @get_from_info('stderr_size', info_section='output')
+    def stderr_size(self):
+        """
+        Get the size of the stderr file
+
+        Example:
+            >>> running_job.stderr_size
+            123
+
+        Returns:
+            stderr file size
+        """
+
+    @property
+    @get_from_info('stdout_size', info_section='output')
+    def stdout_size(self):
+        """
+        Get the size of the stdout file
+
+        Example:
+            >>> running_job.stdout_size
+            123
+
+        Returns:
+            stdout file size
+        """
+
+    def _get_log_chunk(self, length, offset=None, type='stderr', **kwargs):
+        log_chunk = ''
+
+        if offset != None:
+            headers = {'Range': 'bytes={}-{}'.format(int(offset), int(length) + int(offset))}
+        else:
+            headers = {'Range': 'bytes=-{}'.format(int(length))}
+
+        logger.debug('getting %s log chunk (headers -> %s)', type, headers)
+
+        if type == 'stderr':
+            log_chunk = self._adapter.get_stderr(
+                self._job_id,
+                headers=headers,
+                **kwargs
+            )
+        elif type == 'stdout':
+            log_chunk = self._adapter.get_stdout(
+                self._job_id,
+                headers=headers,
+                **kwargs
+            )
+
+        return log_chunk
+
+    def stderr_chunk(self, length, offset=None, **kwargs):
+        """
+            Get a chunk of the log file
+            Example:
+            >>> running_job.stderr_chunk()
+
+        Args:
+            length: Number of bytes to return
+
+            offset: offset for the start of chunk.
+        Returns:
+             log chunk of given length from offset.
+             If offset not specified returns the tail end of file
+        """
+        if self.stderr_size > 0:
+            return self._get_log_chunk(length, offset=offset, type='stderr', **kwargs)
+
+    def stdout_chunk(self, length, offset=None, **kwargs):
+        """
+            Get a chunk of the log file
+            Example:
+            >>> running_job.stdout_chunk()
+
+        Args:
+            length: Number of bytes to return
+
+            offset: offset for the start of chunk.
+        Returns:
+             If offset is None then return the tail end of file
+             else return log chunk of given length from offset.
+        """
+        if self.stdout_size > 0:
+            return self._get_log_chunk(length, offset=offset, type='stdout', **kwargs)

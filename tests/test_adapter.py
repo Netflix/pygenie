@@ -151,7 +151,7 @@ class TestGenie3Adapter(unittest.TestCase):
     def test_get_info_for_rj_all(self, get):
         """Test Genie 3 adapter get info call for job (all)."""
 
-        get.side_effect = [{'_links':{'self':{'href':'http://example.com'}}},{},[],{},{},{}]
+        get.side_effect = [{'_links':{'self':{'href':'http://example.com'}}},{},[],{},{},{},{}]
 
         adapter = Genie3Adapter()
         adapter.get_info_for_rj('111-all')
@@ -163,7 +163,8 @@ class TestGenie3Adapter(unittest.TestCase):
                 call('111-all', if_not_found=[], path='applications', timeout=30),
                 call('111-all', if_not_found={}, path='cluster', timeout=30),
                 call('111-all', if_not_found={}, path='command', timeout=30),
-                call('111-all', if_not_found={}, path='execution', timeout=30)
+                call('111-all', if_not_found={}, path='execution', timeout=30),
+                call('111-all', if_not_found={}, path='output', timeout=30)
             ],
             get.call_args_list
         )
@@ -173,7 +174,7 @@ class TestGenie3Adapter(unittest.TestCase):
         """Test Genie 3 adapter get info call for job (all) (with timeout)."""
 
 
-        get.side_effect = [{'_links':{'self':{'href':'http://example.com'}}},{},[],{},{},{}]
+        get.side_effect = [{'_links':{'self':{'href':'http://example.com'}}},{},[],{},{},{},{}]
         adapter = Genie3Adapter()
         adapter.get_info_for_rj('111-all-timeout', timeout=1)
 
@@ -184,7 +185,8 @@ class TestGenie3Adapter(unittest.TestCase):
                 call('111-all-timeout', if_not_found=[], path='applications', timeout=1),
                 call('111-all-timeout', if_not_found={}, path='cluster', timeout=1),
                 call('111-all-timeout', if_not_found={}, path='command', timeout=1),
-                call('111-all-timeout', if_not_found={}, path='execution', timeout=1)
+                call('111-all-timeout', if_not_found={}, path='execution', timeout=1),
+                call('111-all-timeout', if_not_found={}, path='output', timeout=1)
             ],
             get.call_args_list
         )
