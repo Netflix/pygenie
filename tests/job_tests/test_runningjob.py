@@ -119,7 +119,7 @@ class TestingRunningJobUpdate(unittest.TestCase):
     def test_update_timeout(self, get):
         """Test calling update for RunningJob (with timeout)."""
 
-        get.side_effect = [{'_links':{'self':{'href':'http://example.com'}}},{},[],{},{},{}]
+        get.side_effect = [{'_links':{'self':{'href':'http://example.com'}}},{},[],{},{},{},{}]
 
         running_job = pygenie.jobs.RunningJob('1234-update-timeout')
         running_job.update(timeout=3)
@@ -131,7 +131,8 @@ class TestingRunningJobUpdate(unittest.TestCase):
                 call('1234-update-timeout', if_not_found=[], path='applications', timeout=3),
                 call('1234-update-timeout', if_not_found={}, path='cluster', timeout=3),
                 call('1234-update-timeout', if_not_found={}, path='command', timeout=3),
-                call('1234-update-timeout', if_not_found={}, path='execution', timeout=3)
+                call('1234-update-timeout', if_not_found={}, path='execution', timeout=3),
+                call('1234-update-timeout', if_not_found={}, path='output', timeout=3)
             ],
             get.call_args_list
         )
@@ -339,8 +340,9 @@ class TestingRunningJobProperties(unittest.TestCase):
             actual
         )
 
+    @patch('pygenie.jobs.running.RunningJob.update')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
-    def test_get_runningjob_status(self, get_status):
+    def test_get_runningjob_status(self, get_status, update):
         """Test getting RunningJob.status."""
 
         get_status.side_effect = ['RUNNING', 'SUCCEEDED']
@@ -370,9 +372,10 @@ class TestingRunningJobProperties(unittest.TestCase):
             values
         )
 
+    @patch('pygenie.jobs.running.RunningJob.update')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
-    def test_get_runningjob_status_msg(self, get_info, get_status):
+    def test_get_runningjob_status_msg(self, get_info, get_status, update):
         """Test getting RunningJob.status_msg."""
 
         get_status.side_effect = [
@@ -381,7 +384,7 @@ class TestingRunningJobProperties(unittest.TestCase):
         ]
         get_info.side_effect = [
             {'status_msg': 'job is running'},
-            {'status_msg': 'job is running'},
+            {'status_msg': 'job finished successfully'},
             {'status_msg': 'job finished successfully'}
         ]
 
@@ -397,7 +400,6 @@ class TestingRunningJobProperties(unittest.TestCase):
             get_info.call_args_list,
             [
                 call(u'rj-status_msg', job=True),
-                call(u'rj-status_msg', job=True),
                 call(u'rj-status_msg', job=True)
             ]
         )
@@ -405,7 +407,7 @@ class TestingRunningJobProperties(unittest.TestCase):
         assert_equals(
             [
                 'job is running',
-                'job is running',
+                'job finished successfully',
                 'job finished successfully'
             ],
             values
@@ -416,9 +418,10 @@ class TestingRunningJobProperties(unittest.TestCase):
 class TestingRunningStderr(unittest.TestCase):
     """Test RunningJob stderr log."""
 
+    @patch('pygenie.jobs.running.RunningJob.update')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stderr')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
-    def test_update_stderr(self, get_status, get_stderr):
+    def test_update_stderr(self, get_status, get_stderr, update):
         """Test RunningJob() updating stderr."""
 
         get_status.side_effect = [
@@ -480,10 +483,11 @@ class TestingRunningStderr(unittest.TestCase):
 
         assert_equals(36, len(running_job._cached_stderr))
 
+    @patch('pygenie.jobs.running.RunningJob.update')
     @patch('pygenie.jobs.running.RunningJob._write_to_stream')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stderr')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
-    def test_stderr_watch(self, get_status, get_stderr, write_to_stream):
+    def test_stderr_watch(self, get_status, get_stderr, write_to_stream, update):
         """Test RunningJob().watch_stderr()."""
 
         get_status.side_effect = [
@@ -548,3 +552,67 @@ class TestingRunningStderr(unittest.TestCase):
                 headers=None)
 
         assert_equals('', running_job._cached_stderr)
+
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stderr')
+    def test_stderr_chunk(self, get_stderr, get_info_for_rj):
+        """Test RunningJob() stderr_chunk"""
+
+        get_info_for_rj.return_value = dict([('stderr_size', 10)])
+        get_stderr.return_value = "line1\nline2\nline3\nline4\nline5\nline6"
+
+        running_job = pygenie.jobs.RunningJob('1234-stderr-chunk',
+                                              info={'status': 'SUCCEEDED'})
+
+        running_job.stderr_chunk(10)
+        running_job.stderr_chunk(10, offset=0)
+        running_job.stderr_chunk(10, offset=5)
+
+        assert_equals(
+            [
+                call('1234-stderr-chunk', headers={'Range': 'bytes=-10'}),
+                call('1234-stderr-chunk', headers={'Range': 'bytes=0-10'}),
+                call('1234-stderr-chunk', headers={'Range': 'bytes=5-15'})
+            ],
+            get_stderr.call_args_list
+        )
+
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stdout')
+    def test_stdout_chunk(self, get_stdout, get_info_for_rj):
+        """Test RunningJob() stdout_chunk"""
+
+        get_info_for_rj.return_value = dict([('stdout_size', 10)])
+        get_stdout.return_value = "line1\nline2\nline3\nline4\nline5\nline6"
+
+        running_job = pygenie.jobs.RunningJob('1234-stdout-chunk',
+                                              info={'status': 'SUCCEEDED'})
+
+        running_job.stdout_chunk(10, offset=0)
+
+        assert_equals(
+            [
+                call('1234-stdout-chunk', headers={'Range': 'bytes=0-10'})
+            ],
+            get_stdout.call_args_list
+        )
+
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stdout')
+    def test_stdout_chunk_zero_size(self, get_stdout, get_info_for_rj):
+        """Test RunningJob() stdout_chunk_zero_size"""
+
+        get_info_for_rj.return_value = dict([('stdout_size', 0)])
+        get_stdout.return_value = "line1\nline2\nline3\nline4\nline5\nline6"
+
+        running_job = pygenie.jobs.RunningJob('1234-stdout-chunk',
+                                              info={'status': 'SUCCEEDED'})
+
+        chunk = running_job.stdout_chunk(10, offset=0)
+
+        assert_equals(
+            [],
+            get_stdout.call_args_list
+        )
+
+        assert_equals(chunk, None)
