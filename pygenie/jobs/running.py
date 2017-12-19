@@ -499,6 +499,20 @@ class RunningJob(object):
         """
 
     @property
+    @get_from_info('output_data', info_section='output')
+    def output_data(self):
+        """
+        Get JSON of the output object set by Genie.
+
+        Example:
+            >>> running_job.output_data
+            {...}
+
+        Returns:
+            dict: JSON of the output object.
+        """
+
+    @property
     def start_time(self):
         """
         Get the job's start epoch time (milliseconds).
@@ -848,3 +862,32 @@ class RunningJob(object):
         """
         if self.stdout_size > 0:
             return self._get_log_chunk(length, offset=offset, type='stdout', **kwargs)
+
+    def init_failure_log(self, iterator=False, **kwargs):
+        """
+        Get the job's init failure details as either an iterator or full text.
+
+        Example:
+            >>> running_job.init_failure_log()
+            '...'
+            >>> for l in running_job.init_failure_log(iterator=True):
+            >>>     print(l)
+
+        Args:
+            iterator (bool, optional): Set to True if want to return as iterator.
+
+        Returns:
+            str or iterator or None.
+        """
+        #unlike other log files this file may not exist, so check first
+        init_file_exists = False
+        if self.output_data:
+            output_files = self.output_data.get('files') or []
+            for entry in output_files:
+                if entry.get('name') == 'initFailureDetails.txt':
+                    init_file_exists = True
+
+        if init_file_exists:
+            return self._adapter.get_init_failure_log(self._job_id,
+                                        iterator=iterator,
+                                        **kwargs)

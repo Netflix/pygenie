@@ -340,6 +340,7 @@ class Genie3Adapter(GenieBaseAdapter):
                                    path='output',
                                    if_not_found=dict(),
                                    timeout=timeout)
+            ret['output_data'] = output_data
             output_files = output_data.get('files') or []
             for entry in output_files:
                 if entry.get('name') == 'stderr':
@@ -370,6 +371,11 @@ class Genie3Adapter(GenieBaseAdapter):
         """Get a stdout log for a job."""
 
         return self.get_log(job_id, 'stdout', **kwargs)
+
+    def get_init_failure_log(self, job_id, **kwargs):
+        """Get init failure log for a job."""
+
+        return self.get_log(job_id, 'initFailureDetails.txt', **kwargs)
 
     def kill_job(self, job_id=None, kill_uri=None, timeout=30):
         """Kill a job."""
