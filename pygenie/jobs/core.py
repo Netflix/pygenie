@@ -750,6 +750,8 @@ class GenieJob(object):
             :py:class:`GenieJob`: self
         """
 
+        assert _job_id is not None and _job_id != '', "job id cannot be '' or None"
+
     @unicodify
     @arg_string
     @add_to_repr('overwrite')

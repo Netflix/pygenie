@@ -302,6 +302,32 @@ class TestingJobExecute(unittest.TestCase):
         assert_equals(new_job_id, job._job_id)
 
 
+@patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
+class TestingSetJobId(unittest.TestCase):
+    """Test setting job id."""
+
+    def test_job_id_empty_string(self):
+        """Test setting job id empty string ('')."""
+
+        with assert_raises(AssertionError) as cm:
+            job = pygenie.jobs.GenieJob().job_id('')
+
+    def test_job_id_none(self):
+        """Test setting job id None."""
+
+        with assert_raises(AssertionError) as cm:
+            job = pygenie.jobs.GenieJob().job_id(None)
+
+    def test_job_id(self):
+        """Test setting job id."""
+
+        job = pygenie.jobs.GenieJob().job_id('job-id-1234')
+
+        assert_equals(
+            'job-id-1234',
+            job._job_id
+        )
+
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
 class TestingSetJobName(unittest.TestCase):
