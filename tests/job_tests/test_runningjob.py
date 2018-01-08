@@ -461,6 +461,30 @@ class TestingRunningJobProperties(unittest.TestCase):
             values
         )
 
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
+    def test_get_runningjob_metadata(self, get_info, get_status):
+        """Test getting RunningJob.metadata."""
+
+        value = {"test": "test"}
+
+        get_status.return_value = 'RUNNING'
+        get_info.return_value = {'metadata': value}
+
+        running_job = pygenie.jobs.RunningJob('rj-metadata')
+
+        values = [
+            running_job.metadata,
+            running_job.metadata
+        ]
+
+        get_info.assert_called_once_with('rj-metadata', job=True)
+
+        assert_equals(
+            [value, value],
+            values
+        )
+
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
 class TestingRunningStderr(unittest.TestCase):

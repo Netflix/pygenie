@@ -172,6 +172,7 @@ class GenieJob(object):
         self._job_id = uuid_str()
         self._job_name = None
         self._job_version = 'NA'
+        self._metadata = None
         self._parameters = OrderedDict()
         self._post_cmd_args = list()
         self._setup_file = None
@@ -831,6 +832,31 @@ class GenieJob(object):
         Returns:
             :py:class:`GenieJob`: self
         """
+
+    @unicodify
+    @add_to_repr('append')
+    def metadata(self, **kwargs):
+        """
+        Sets the metadata for the job (a dict).
+
+        Example:
+            >>> job = GenieJob() \\
+            ...     .metadata(source='service') \\
+            ...     .metadata(job_type='GenieJob')
+
+        Args:
+            **kwargs: Key/value for the metadata mapping.
+
+        Returns:
+            :py:class:`GenieJob`: self
+        """
+
+        if self._metadata is None:
+            self._metadata = kwargs
+        else:
+            self._metadata.update(kwargs)
+
+        return self
 
     @unicodify
     @add_to_repr('append')

@@ -201,6 +201,8 @@ class Genie3Adapter(GenieBaseAdapter):
             payload['grouping'] = job.get('genie_grouping')
         if job.get('genie_grouping_instance'):
             payload['groupingInstance'] = job.get('genie_grouping_instance')
+        if job.get('metadata'):
+            payload['metadata'] = job.get('metadata')
 
         return payload
 
@@ -287,6 +289,7 @@ class Genie3Adapter(GenieBaseAdapter):
             ret['job_link'] = job_link
             ret['json_link'] = link
             ret['kill_uri'] = link
+            ret['metadata'] = data.get('metadata') or dict()
             ret['name'] = data.get('name')
             ret['output_uri'] = output_link
             ret['started'] = data.get('started')

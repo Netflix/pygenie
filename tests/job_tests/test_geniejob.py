@@ -448,7 +448,7 @@ class TestingGroupingInstance(unittest.TestCase):
             .genie_grouping_instance('test_group_instance_repr_2') \
 
         assert_equals(
-           '.'.join([
+            '.'.join([
                 'GenieJob()',
                 'genie_grouping_instance("test_group_instance_repr_2")',
                 'genie_username("group_instance_repr")',
@@ -479,4 +479,69 @@ class TestingGroupingInstance(unittest.TestCase):
         assert_equals(
             'test_grouping_instance_payload',
             pygenie.adapter.genie_3.get_payload(job)['groupingInstance']
+        )
+
+
+@patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
+class TestingMetadata(unittest.TestCase):
+    """Test job metadata."""
+
+    def test_metadata_repr(self):
+        """Test job metadata repr."""
+
+        job = pygenie.jobs.GenieJob() \
+            .job_id('1234') \
+            .genie_username('test_metadata_repr') \
+            .metadata(foo='fizz') \
+            .metadata(foo='foo') \
+            .metadata(bar='buzz') \
+            .metadata(hello='hi') \
+
+        assert_equals(
+            '.'.join([
+                'GenieJob()',
+                'genie_username("test_metadata_repr")',
+                'job_id("1234")',
+                'metadata(bar="buzz")',
+                'metadata(foo="fizz")',
+                'metadata(foo="foo")',
+                'metadata(hello="hi")'
+            ]),
+            str(job)
+        )
+
+    def test_setting_metadata(self):
+        """Test setting job metadata."""
+
+        job = pygenie.jobs.GenieJob() \
+            .metadata(key1='val1') \
+            .metadata(key2='val2') \
+            .metadata(key3='val3') \
+            .metadata(key1='val1a') \
+            .metadata(key4='val4', key5='val5')
+
+        assert_equals(
+            {
+                'key1': 'val1a',
+                'key2': 'val2',
+                'key3': 'val3',
+                'key4': 'val4',
+                'key5': 'val5',
+            },
+            job._metadata
+        )
+
+    def test_metadata_payload_genie3(self):
+        """Test job metadata payload (Genie 3)."""
+
+        job = pygenie.jobs.GenieJob() \
+            .command_arguments('test') \
+            .metadata(k1=1, k2=2)
+
+        assert_equals(
+            {
+                'k1': 1,
+                'k2': 2,
+            },
+            pygenie.adapter.genie_3.get_payload(job)['metadata']
         )

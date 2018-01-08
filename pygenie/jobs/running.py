@@ -485,6 +485,20 @@ class RunningJob(object):
         return self.request_data.get('memory')
 
     @property
+    @get_from_info('metadata', info_section='job')
+    def metadata(self):
+        """
+        Get the job's metadata.
+
+        Example:
+            >>> running_job.metadata
+            {"scheduler": "cron"}
+
+        Returns:
+            dict: Metadata mapping.
+        """
+
+    @property
     @get_from_info('output_uri', info_section='job')
     def output_uri(self):
         """
