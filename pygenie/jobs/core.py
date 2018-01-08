@@ -165,11 +165,14 @@ class GenieJob(object):
         self._description = None
         self._email = None
         self._genie_cpu = None
+        self._genie_grouping = None
+        self._genie_grouping_instance = None
         self._genie_memory = None
         self._group = None
         self._job_id = uuid_str()
         self._job_name = None
         self._job_version = 'NA'
+        self._metadata = None
         self._parameters = OrderedDict()
         self._post_cmd_args = list()
         self._setup_file = None
@@ -553,6 +556,48 @@ class GenieJob(object):
         logger.warning("Use .genie_email('%s') to set Genie email.", email)
         return self.genie_email(email)
 
+    @unicodify
+    @arg_string
+    @add_to_repr('overwrite')
+    def genie_grouping(self, _genie_grouping):
+        """
+        Set the Genie grouping of the job relative to other jobs
+        (e.g. scheduler job name).
+
+        Example:
+            >>> job = GenieJob() \\
+            ...     .genie_grouping('MY.JOB.TEST_1')
+
+        Args:
+             genie_grouping (str): The grouping name.
+
+        Returns:
+            :py:class:`GenieJob`: self
+        """
+
+    @unicodify
+    @arg_string
+    @add_to_repr('overwrite')
+    def genie_grouping_instance(self, _genie_grouping_instance):
+        """
+        Set the Genie grouping instance of the job relative to other jobs
+        (e.g. scheduler job run).
+
+        Example:
+            >>> job = GenieJob() \\
+            ...     .genie_grouping('MY.JOB.TEST_1') \\
+            ...     .genie_grouping_instance('11')
+            >>> job = GenieJob() \\
+            ...     .genie_grouping('MY.JOB.TEST_1') \\
+            ...     .genie_grouping_instance('12')
+
+        Args:
+             genie_grouping_instance (str): The grouping instance.
+
+        Returns:
+            :py:class:`GenieJob`: self
+        """
+
     @add_to_repr('overwrite')
     def genie_memory(self, memory):
         """
@@ -750,6 +795,8 @@ class GenieJob(object):
             :py:class:`GenieJob`: self
         """
 
+        assert _job_id is not None and _job_id != '', "job id cannot be '' or None"
+
     @unicodify
     @arg_string
     @add_to_repr('overwrite')
@@ -785,6 +832,31 @@ class GenieJob(object):
         Returns:
             :py:class:`GenieJob`: self
         """
+
+    @unicodify
+    @add_to_repr('append')
+    def metadata(self, **kwargs):
+        """
+        Sets the metadata for the job (a dict).
+
+        Example:
+            >>> job = GenieJob() \\
+            ...     .metadata(source='service') \\
+            ...     .metadata(job_type='GenieJob')
+
+        Args:
+            **kwargs: Key/value for the metadata mapping.
+
+        Returns:
+            :py:class:`GenieJob`: self
+        """
+
+        if self._metadata is None:
+            self._metadata = kwargs
+        else:
+            self._metadata.update(kwargs)
+
+        return self
 
     @unicodify
     @add_to_repr('append')

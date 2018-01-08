@@ -302,6 +302,32 @@ class TestingJobExecute(unittest.TestCase):
         assert_equals(new_job_id, job._job_id)
 
 
+@patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
+class TestingSetJobId(unittest.TestCase):
+    """Test setting job id."""
+
+    def test_job_id_empty_string(self):
+        """Test setting job id empty string ('')."""
+
+        with assert_raises(AssertionError) as cm:
+            job = pygenie.jobs.GenieJob().job_id('')
+
+    def test_job_id_none(self):
+        """Test setting job id None."""
+
+        with assert_raises(AssertionError) as cm:
+            job = pygenie.jobs.GenieJob().job_id(None)
+
+    def test_job_id(self):
+        """Test setting job id."""
+
+        job = pygenie.jobs.GenieJob().job_id('job-id-1234')
+
+        assert_equals(
+            'job-id-1234',
+            job._job_id
+        )
+
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
 class TestingSetJobName(unittest.TestCase):
@@ -357,4 +383,165 @@ class TestingSetGenieUrl(unittest.TestCase):
         assert_equals(
             url_clean,
             job._conf.genie.url
+        )
+
+
+@patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
+class TestingGrouping(unittest.TestCase):
+    """Test job Genie grouping."""
+
+    def test_grouping_repr(self):
+        """Test job Genie grouping repr."""
+
+        job = pygenie.jobs.GenieJob() \
+            .job_id('1234') \
+            .genie_username('group_repr') \
+            .genie_grouping('test_group_repr_1') \
+            .genie_grouping('test_group_repr_2')
+
+        assert_equals(
+           '.'.join([
+                'GenieJob()',
+                'genie_grouping("test_group_repr_2")',
+                'genie_username("group_repr")',
+                'job_id("1234")',
+            ]),
+            str(job)
+        )
+
+    def test_setting_grouping(self):
+        """Test setting job Genie grouping."""
+
+        job = pygenie.jobs.GenieJob() \
+            .genie_grouping('test_group') \
+            .genie_grouping('test_group_1')
+
+        assert_equals(
+            'test_group_1',
+            job._genie_grouping
+        )
+
+    def test_grouping_payload_genie3(self):
+        """Test job Genie grouping payload (Genie 3)."""
+
+        job = pygenie.jobs.GenieJob() \
+            .command_arguments('test') \
+            .genie_grouping('test_grouping_payload') \
+
+        assert_equals(
+            'test_grouping_payload',
+            pygenie.adapter.genie_3.get_payload(job)['grouping']
+        )
+
+
+@patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
+class TestingGroupingInstance(unittest.TestCase):
+    """Test job Genie grouping instance."""
+
+    def test_grouping_instance_repr(self):
+        """Test job Genie grouping instance repr."""
+
+        job = pygenie.jobs.GenieJob() \
+            .job_id('1234') \
+            .genie_username('group_instance_repr') \
+            .genie_grouping_instance('test_group_instance_repr_1') \
+            .genie_grouping_instance('test_group_instance_repr_2') \
+
+        assert_equals(
+            '.'.join([
+                'GenieJob()',
+                'genie_grouping_instance("test_group_instance_repr_2")',
+                'genie_username("group_instance_repr")',
+                'job_id("1234")',
+            ]),
+            str(job)
+        )
+
+    def test_setting_grouping_instance(self):
+        """Test setting job Genie grouping instance."""
+
+        job = pygenie.jobs.GenieJob() \
+            .genie_grouping_instance('test_group_1234') \
+            .genie_grouping_instance('test_group_777')
+
+        assert_equals(
+            'test_group_777',
+            job._genie_grouping_instance
+        )
+
+    def test_grouping_instance_payload_genie3(self):
+        """Test job Genie grouping instance payload (Genie 3)."""
+
+        job = pygenie.jobs.GenieJob() \
+            .command_arguments('test') \
+            .genie_grouping_instance('test_grouping_instance_payload') \
+
+        assert_equals(
+            'test_grouping_instance_payload',
+            pygenie.adapter.genie_3.get_payload(job)['groupingInstance']
+        )
+
+
+@patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
+class TestingMetadata(unittest.TestCase):
+    """Test job metadata."""
+
+    def test_metadata_repr(self):
+        """Test job metadata repr."""
+
+        job = pygenie.jobs.GenieJob() \
+            .job_id('1234') \
+            .genie_username('test_metadata_repr') \
+            .metadata(foo='fizz') \
+            .metadata(foo='foo') \
+            .metadata(bar='buzz') \
+            .metadata(hello='hi') \
+
+        assert_equals(
+            '.'.join([
+                'GenieJob()',
+                'genie_username("test_metadata_repr")',
+                'job_id("1234")',
+                'metadata(bar="buzz")',
+                'metadata(foo="fizz")',
+                'metadata(foo="foo")',
+                'metadata(hello="hi")'
+            ]),
+            str(job)
+        )
+
+    def test_setting_metadata(self):
+        """Test setting job metadata."""
+
+        job = pygenie.jobs.GenieJob() \
+            .metadata(key1='val1') \
+            .metadata(key2='val2') \
+            .metadata(key3='val3') \
+            .metadata(key1='val1a') \
+            .metadata(key4='val4', key5='val5')
+
+        assert_equals(
+            {
+                'key1': 'val1a',
+                'key2': 'val2',
+                'key3': 'val3',
+                'key4': 'val4',
+                'key5': 'val5',
+            },
+            job._metadata
+        )
+
+    def test_metadata_payload_genie3(self):
+        """Test job metadata payload (Genie 3)."""
+
+        job = pygenie.jobs.GenieJob() \
+            .command_arguments('test') \
+            .metadata(k1=1, k2=2)
+
+        assert_equals(
+            {
+                'k1': 1,
+                'k2': 2,
+            },
+            pygenie.adapter.genie_3.get_payload(job)['metadata']
         )
