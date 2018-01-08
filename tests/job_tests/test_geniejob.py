@@ -384,3 +384,99 @@ class TestingSetGenieUrl(unittest.TestCase):
             url_clean,
             job._conf.genie.url
         )
+
+
+@patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
+class TestingGrouping(unittest.TestCase):
+    """Test job Genie grouping."""
+
+    def test_grouping_repr(self):
+        """Test job Genie grouping repr."""
+
+        job = pygenie.jobs.GenieJob() \
+            .job_id('1234') \
+            .genie_username('group_repr') \
+            .genie_grouping('test_group_repr_1') \
+            .genie_grouping('test_group_repr_2')
+
+        assert_equals(
+           '.'.join([
+                'GenieJob()',
+                'genie_grouping("test_group_repr_2")',
+                'genie_username("group_repr")',
+                'job_id("1234")',
+            ]),
+            str(job)
+        )
+
+    def test_setting_grouping(self):
+        """Test setting job Genie grouping."""
+
+        job = pygenie.jobs.GenieJob() \
+            .genie_grouping('test_group') \
+            .genie_grouping('test_group_1')
+
+        assert_equals(
+            'test_group_1',
+            job._genie_grouping
+        )
+
+    def test_grouping_payload_genie3(self):
+        """Test job Genie grouping payload (Genie 3)."""
+
+        job = pygenie.jobs.GenieJob() \
+            .command_arguments('test') \
+            .genie_grouping('test_grouping_payload') \
+
+        assert_equals(
+            'test_grouping_payload',
+            pygenie.adapter.genie_3.get_payload(job)['grouping']
+        )
+
+
+@patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
+class TestingGroupingInstance(unittest.TestCase):
+    """Test job Genie grouping instance."""
+
+    def test_grouping_instance_repr(self):
+        """Test job Genie grouping instance repr."""
+
+        job = pygenie.jobs.GenieJob() \
+            .job_id('1234') \
+            .genie_username('group_instance_repr') \
+            .genie_grouping_instance('test_group_instance_repr_1') \
+            .genie_grouping_instance('test_group_instance_repr_2') \
+
+        assert_equals(
+           '.'.join([
+                'GenieJob()',
+                'genie_grouping_instance("test_group_instance_repr_2")',
+                'genie_username("group_instance_repr")',
+                'job_id("1234")',
+            ]),
+            str(job)
+        )
+
+    def test_setting_grouping_instance(self):
+        """Test setting job Genie grouping instance."""
+
+        job = pygenie.jobs.GenieJob() \
+            .genie_grouping_instance('test_group_1234') \
+            .genie_grouping_instance('test_group_777')
+
+        assert_equals(
+            'test_group_777',
+            job._genie_grouping_instance
+        )
+
+    def test_grouping_instance_payload_genie3(self):
+        """Test job Genie grouping instance payload (Genie 3)."""
+
+        job = pygenie.jobs.GenieJob() \
+            .command_arguments('test') \
+            .genie_grouping_instance('test_grouping_instance_payload') \
+
+        assert_equals(
+            'test_grouping_instance_payload',
+            pygenie.adapter.genie_3.get_payload(job)['groupingInstance']
+        )

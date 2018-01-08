@@ -413,6 +413,54 @@ class TestingRunningJobProperties(unittest.TestCase):
             values
         )
 
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
+    def test_get_runningjob_genie_grouping(self, get_info, get_status):
+        """Test getting RunningJob.genie_grouping."""
+
+        value = 'test_group'
+
+        get_status.return_value = 'RUNNING'
+        get_info.return_value = {'genie_grouping': value}
+
+        running_job = pygenie.jobs.RunningJob('rj-grouping')
+
+        values = [
+            running_job.genie_grouping,
+            running_job.genie_grouping
+        ]
+
+        get_info.assert_called_once_with('rj-grouping', job=True)
+
+        assert_equals(
+            [value, value],
+            values
+        )
+
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
+    def test_get_runningjob_genie_grouping_instance(self, get_info, get_status):
+        """Test getting RunningJob.genie_grouping_instance."""
+
+        value = 'test_group.1234'
+
+        get_status.return_value = 'RUNNING'
+        get_info.return_value = {'genie_grouping_instance': value}
+
+        running_job = pygenie.jobs.RunningJob('rj-grouping-instance')
+
+        values = [
+            running_job.genie_grouping_instance,
+            running_job.genie_grouping_instance
+        ]
+
+        get_info.assert_called_once_with('rj-grouping-instance', job=True)
+
+        assert_equals(
+            [value, value],
+            values
+        )
+
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
 class TestingRunningStderr(unittest.TestCase):

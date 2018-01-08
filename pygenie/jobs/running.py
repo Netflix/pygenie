@@ -272,6 +272,34 @@ class RunningJob(object):
 
         return self.__convert_dttm_to_epoch('finished')
 
+    @property
+    @get_from_info('genie_grouping', info_section='job')
+    def genie_grouping(self):
+        """
+        Get the Genie grouping for the job.
+
+        Example:
+            >>> running_job.genie_grouping
+            'test_group'
+
+        Returns:
+            str: The Genie grouping.
+        """
+
+    @property
+    @get_from_info('genie_grouping_instance', info_section='job')
+    def genie_grouping_instance(self):
+        """
+        Get the Genie grouping instance for the job.
+
+        Example:
+            >>> running_job.genie_grouping_instance
+            'test_group.1234'
+
+        Returns:
+            str: The Genie grouping instance.
+        """
+
     def genie_log(self, iterator=False, **kwargs):
         """
         Get the job's Genie log as either an iterator or full text.

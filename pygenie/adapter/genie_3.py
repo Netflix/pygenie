@@ -197,6 +197,10 @@ class Genie3Adapter(GenieBaseAdapter):
             payload['cpu'] = job.get('genie_cpu')
         if job.get('genie_memory'):
             payload['memory'] = job.get('genie_memory')
+        if job.get('genie_grouping'):
+            payload['grouping'] = job.get('genie_grouping')
+        if job.get('genie_grouping_instance'):
+            payload['groupingInstance'] = job.get('genie_grouping_instance')
 
         return payload
 
@@ -277,6 +281,8 @@ class Genie3Adapter(GenieBaseAdapter):
             ret['created'] = data.get('created')
             ret['description'] = data.get('description')
             ret['finished'] = data.get('finished')
+            ret['genie_grouping'] = data.get('grouping')
+            ret['genie_grouping_instance'] = data.get('groupingInstance')
             ret['id'] = data.get('id')
             ret['job_link'] = job_link
             ret['json_link'] = link
