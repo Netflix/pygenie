@@ -852,7 +852,7 @@ class GenieJob(object):
         """
 
         if self._metadata is None:
-            self._metadata = kwargs
+            self._metadata = OrderedDict(kwargs)
         else:
             self._metadata.update(kwargs)
 
