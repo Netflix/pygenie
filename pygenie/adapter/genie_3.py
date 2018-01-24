@@ -304,10 +304,7 @@ class Genie3Adapter(GenieBaseAdapter):
             ret['version'] = data.get('version')
 
         if request or get_all:
-            request_data = self.get(job_id,
-                                    path='request',
-                                    timeout=timeout,
-                                    headers={'Accept': 'application/json'})
+            request_data = self.get(job_id, path='request', timeout=timeout)
 
             ret['disable_archive'] = request_data.get('disableLogArchival')
             ret['email'] = request_data.get('email')
@@ -319,8 +316,7 @@ class Genie3Adapter(GenieBaseAdapter):
             application_data = self.get(job_id,
                                         path='applications',
                                         if_not_found=list(),
-                                        timeout=timeout,
-                                        headers={'Accept': 'application/json'})
+                                        timeout=timeout)
 
             ret['application_name'] = ','.join(a.get('id') for a in application_data)
 
@@ -328,8 +324,7 @@ class Genie3Adapter(GenieBaseAdapter):
             cluster_data = self.get(job_id,
                                     path='cluster',
                                     if_not_found=dict(),
-                                    timeout=timeout,
-                                    headers={'Accept': 'application/json'})
+                                    timeout=timeout)
 
             ret['cluster_id'] = cluster_data.get('id')
             ret['cluster_name'] = cluster_data.get('name')
@@ -338,8 +333,7 @@ class Genie3Adapter(GenieBaseAdapter):
             command_data = self.get(job_id,
                                     path='command',
                                     if_not_found=dict(),
-                                    timeout=timeout,
-                                    headers={'Accept': 'application/json'})
+                                    timeout=timeout)
 
             ret['command_id'] = command_data.get('id')
             ret['command_name'] = command_data.get('name')
@@ -349,8 +343,7 @@ class Genie3Adapter(GenieBaseAdapter):
             execution_data = self.get(job_id,
                                       path='execution',
                                       if_not_found=dict(),
-                                      timeout=timeout,
-                                      headers={'Accept': 'application/json'})
+                                      timeout=timeout)
 
             ret['client_host'] = execution_data.get('hostName')
 
@@ -360,6 +353,7 @@ class Genie3Adapter(GenieBaseAdapter):
                                    if_not_found=dict(),
                                    timeout=timeout,
                                    headers={'Accept': 'application/json'})
+
             ret['output_data'] = output_data
             output_files = output_data.get('files') or []
             for entry in output_files:
