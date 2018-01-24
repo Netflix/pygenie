@@ -267,9 +267,7 @@ class Genie3Adapter(GenieBaseAdapter):
         ret = dict()
 
         if job or get_all:
-            data = self.get(job_id,
-                            timeout=timeout,
-                            headers={'Accept': 'application/json'})
+            data = self.get(job_id, timeout=timeout)
 
             link = data.get('_links', {}).get('self', {}).get('href')
             link_parts = urlparse(link)

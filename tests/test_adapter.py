@@ -158,7 +158,7 @@ class TestGenie3Adapter(unittest.TestCase):
 
         assert_equals(
             [
-                call('111-all', timeout=30, headers={u'Accept': u'application/json'}),
+                call('111-all', timeout=30),
                 call('111-all', path='request', timeout=30, headers={u'Accept': u'application/json'}),
                 call('111-all', path='applications', timeout=30, headers={u'Accept': u'application/json'}, if_not_found=[]),
                 call('111-all', path='cluster', timeout=30, headers={u'Accept': u'application/json'}, if_not_found={}),
@@ -188,7 +188,7 @@ class TestGenie3Adapter(unittest.TestCase):
 
         assert_equals(
             [
-                call('111-all-timeout', timeout=1, headers={u'Accept': u'application/json'}),
+                call('111-all-timeout', timeout=1),
                 call('111-all-timeout', path='request', timeout=1, headers={u'Accept': u'application/json'}),
                 call('111-all-timeout', path='applications', timeout=1, headers={u'Accept': u'application/json'}, if_not_found=[]),
                 call('111-all-timeout', path='cluster', timeout=1, headers={u'Accept': u'application/json'}, if_not_found={}),
@@ -210,7 +210,7 @@ class TestGenie3Adapter(unittest.TestCase):
 
         assert_equals(
             [
-                call('111-job', timeout=30, headers={u'Accept': u'application/json'})
+                call('111-job', timeout=30),
             ],
             get.call_args_list
         )
