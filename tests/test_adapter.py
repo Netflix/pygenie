@@ -158,13 +158,13 @@ class TestGenie3Adapter(unittest.TestCase):
 
         assert_equals(
             [
-                call('111-all', timeout=30),
-                call('111-all', path='request', timeout=30),
-                call('111-all', if_not_found=[], path='applications', timeout=30),
-                call('111-all', if_not_found={}, path='cluster', timeout=30),
-                call('111-all', if_not_found={}, path='command', timeout=30),
-                call('111-all', if_not_found={}, path='execution', timeout=30),
-                call('111-all', if_not_found={}, path='output', timeout=30)
+                call('111-all', timeout=30, headers={u'Accept': u'application/json'}),
+                call('111-all', path='request', timeout=30, headers={u'Accept': u'application/json'}),
+                call('111-all', path='applications', timeout=30, headers={u'Accept': u'application/json'}, if_not_found=[]),
+                call('111-all', path='cluster', timeout=30, headers={u'Accept': u'application/json'}, if_not_found={}),
+                call('111-all', path='command', timeout=30, headers={u'Accept': u'application/json'}, if_not_found={}),
+                call('111-all', path='execution', timeout=30, headers={u'Accept': u'application/json'}, if_not_found={}),
+                call('111-all', path='output', timeout=30, headers={u'Accept': u'application/json'}, if_not_found={})
             ],
             get.call_args_list
         )
@@ -174,19 +174,27 @@ class TestGenie3Adapter(unittest.TestCase):
         """Test Genie 3 adapter get info call for job (all) (with timeout)."""
 
 
-        get.side_effect = [{'_links':{'self':{'href':'http://example.com'}}},{},[],{},{},{},{}]
+        get.side_effect = [
+            {'_links':{'self':{'href':'http://example.com'}}},
+            {},
+            [],
+            {},
+            {},
+            {},
+            {}
+        ]
         adapter = Genie3Adapter()
         adapter.get_info_for_rj('111-all-timeout', timeout=1)
 
         assert_equals(
             [
-                call('111-all-timeout', timeout=1),
-                call('111-all-timeout', path='request', timeout=1),
-                call('111-all-timeout', if_not_found=[], path='applications', timeout=1),
-                call('111-all-timeout', if_not_found={}, path='cluster', timeout=1),
-                call('111-all-timeout', if_not_found={}, path='command', timeout=1),
-                call('111-all-timeout', if_not_found={}, path='execution', timeout=1),
-                call('111-all-timeout', if_not_found={}, path='output', timeout=1)
+                call('111-all-timeout', timeout=1, headers={u'Accept': u'application/json'}),
+                call('111-all-timeout', path='request', timeout=1, headers={u'Accept': u'application/json'}),
+                call('111-all-timeout', path='applications', timeout=1, headers={u'Accept': u'application/json'}, if_not_found=[]),
+                call('111-all-timeout', path='cluster', timeout=1, headers={u'Accept': u'application/json'}, if_not_found={}),
+                call('111-all-timeout', path='command', timeout=1, headers={u'Accept': u'application/json'}, if_not_found={}),
+                call('111-all-timeout', path='execution', timeout=1, headers={u'Accept': u'application/json'}, if_not_found={}),
+                call('111-all-timeout', path='output', timeout=1, headers={u'Accept': u'application/json'}, if_not_found={})
             ],
             get.call_args_list
         )
@@ -202,9 +210,58 @@ class TestGenie3Adapter(unittest.TestCase):
 
         assert_equals(
             [
-                call('111-job', timeout=30)
+                call('111-job', timeout=30, headers={u'Accept': u'application/json'})
             ],
             get.call_args_list
+        )
+
+    @patch('pygenie.utils.requests.request')
+    def test_get_404(self, request):
+        """Test Genie 3 adapter get with if_not_found (404)."""
+
+        request.side_effect = [
+            fake_response(None, status_code=404),
+            fake_response(None, status_code=111),
+            fake_response(None, status_code=112),
+            fake_response(None, status_code=113),
+        ]
+
+        adapter = Genie3Adapter()
+
+        assert_equals(
+            'DEFAULT',
+            Genie3Adapter() .get(job_id='job-get-404', path='output', if_not_found='DEFAULT')
+        )
+
+        assert_equals(
+            1,
+            request.call_count
+        )
+
+    @patch('pygenie.utils.requests.request')
+    def test_get_500(self, request):
+        """Test Genie 3 adapter get with if_not_found (500)."""
+
+        request.side_effect = [
+            fake_response(None, status_code=500),
+            fake_response(None, status_code=500),
+            fake_response(None, status_code=500),
+            fake_response(None, status_code=500),
+            fake_response(None, status_code=500),
+            fake_response(None, status_code=500),
+            fake_response(None, status_code=500),
+        ]
+
+        adapter = Genie3Adapter()
+
+        assert_equals(
+            {},
+            Genie3Adapter().get(job_id='job-get-500', path='output', if_not_found={}, attempts=3, backoff=0)
+        )
+
+        assert_equals(
+            3,
+            request.call_count
         )
 
 

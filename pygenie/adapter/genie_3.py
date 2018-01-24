@@ -230,6 +230,7 @@ class Genie3Adapter(GenieBaseAdapter):
             del kwargs['timeout']
 
         try:
+            # make HTTP request, do not retry 404s (retry everything else)
             return call(method='get',
                         url=url,
                         auth_handler=self.auth_handler,
@@ -237,8 +238,10 @@ class Genie3Adapter(GenieBaseAdapter):
                         **kwargs) \
                    .json()
         except GenieHTTPError as err:
-            if err.response.status_code == 404:
-                msg = "job not found at {}".format(url)
+            if err.response.status_code in {404, 500}:
+                msg = "job not found at {}".format(url) \
+                    if err.response.status_code == 404 \
+                    else 'issues getting job at {}'.format(url)
                 if if_not_found is not None:
                     return if_not_found
                 raise GenieJobNotFoundError(msg)
@@ -264,7 +267,9 @@ class Genie3Adapter(GenieBaseAdapter):
         ret = dict()
 
         if job or get_all:
-            data = self.get(job_id, timeout=timeout)
+            data = self.get(job_id,
+                            timeout=timeout,
+                            headers={'Accept': 'application/json'})
 
             link = data.get('_links', {}).get('self', {}).get('href')
             link_parts = urlparse(link)
@@ -301,7 +306,10 @@ class Genie3Adapter(GenieBaseAdapter):
             ret['version'] = data.get('version')
 
         if request or get_all:
-            request_data = self.get(job_id, path='request', timeout=timeout)
+            request_data = self.get(job_id,
+                                    path='request',
+                                    timeout=timeout,
+                                    headers={'Accept': 'application/json'})
 
             ret['disable_archive'] = request_data.get('disableLogArchival')
             ret['email'] = request_data.get('email')
@@ -313,7 +321,8 @@ class Genie3Adapter(GenieBaseAdapter):
             application_data = self.get(job_id,
                                         path='applications',
                                         if_not_found=list(),
-                                        timeout=timeout)
+                                        timeout=timeout,
+                                        headers={'Accept': 'application/json'})
 
             ret['application_name'] = ','.join(a.get('id') for a in application_data)
 
@@ -321,7 +330,8 @@ class Genie3Adapter(GenieBaseAdapter):
             cluster_data = self.get(job_id,
                                     path='cluster',
                                     if_not_found=dict(),
-                                    timeout=timeout)
+                                    timeout=timeout,
+                                    headers={'Accept': 'application/json'})
 
             ret['cluster_id'] = cluster_data.get('id')
             ret['cluster_name'] = cluster_data.get('name')
@@ -330,7 +340,8 @@ class Genie3Adapter(GenieBaseAdapter):
             command_data = self.get(job_id,
                                     path='command',
                                     if_not_found=dict(),
-                                    timeout=timeout)
+                                    timeout=timeout,
+                                    headers={'Accept': 'application/json'})
 
             ret['command_id'] = command_data.get('id')
             ret['command_name'] = command_data.get('name')
@@ -340,7 +351,8 @@ class Genie3Adapter(GenieBaseAdapter):
             execution_data = self.get(job_id,
                                       path='execution',
                                       if_not_found=dict(),
-                                      timeout=timeout)
+                                      timeout=timeout,
+                                      headers={'Accept': 'application/json'})
 
             ret['client_host'] = execution_data.get('hostName')
 
@@ -348,13 +360,16 @@ class Genie3Adapter(GenieBaseAdapter):
             output_data = self.get(job_id,
                                    path='output',
                                    if_not_found=dict(),
-                                   timeout=timeout)
+                                   timeout=timeout,
+                                   headers={'Accept': 'application/json'})
             ret['output_data'] = output_data
             output_files = output_data.get('files') or []
             for entry in output_files:
                 if entry.get('name') == 'stderr':
+                    # TODO: Should the default size be None to signify unknown vs 0 byte file?
                     ret['stderr_size'] = entry.get('size') or 0
                 if entry.get('name') == 'stdout':
+                    # TODO: Should the default size be None to signify unknown vs 0 byte file?
                     ret['stdout_size'] = entry.get('size') or 0
         return ret
 
