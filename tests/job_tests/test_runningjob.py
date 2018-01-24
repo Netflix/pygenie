@@ -127,11 +127,11 @@ class TestingRunningJobUpdate(unittest.TestCase):
         assert_equals(
             [
                 call('1234-update-timeout', timeout=3),
-                call('1234-update-timeout', path='request', timeout=3, headers={u'Accept': u'application/json'}),
-                call('1234-update-timeout', if_not_found=[], path='applications', timeout=3, headers={u'Accept': u'application/json'}),
-                call('1234-update-timeout', if_not_found={}, path='cluster', timeout=3, headers={u'Accept': u'application/json'}),
-                call('1234-update-timeout', if_not_found={}, path='command', timeout=3, headers={u'Accept': u'application/json'}),
-                call('1234-update-timeout', if_not_found={}, path='execution', timeout=3, headers={u'Accept': u'application/json'}),
+                call('1234-update-timeout', path='request', timeout=3),
+                call('1234-update-timeout', if_not_found=[], path='applications', timeout=3),
+                call('1234-update-timeout', if_not_found={}, path='cluster', timeout=3),
+                call('1234-update-timeout', if_not_found={}, path='command', timeout=3),
+                call('1234-update-timeout', if_not_found={}, path='execution', timeout=3),
                 call('1234-update-timeout', if_not_found={}, path='output', timeout=3, headers={u'Accept': u'application/json'})
             ],
             get.call_args_list
@@ -159,7 +159,7 @@ class TestingRunningJobUpdate(unittest.TestCase):
         running_job.update(info_section='request', timeout=1)
 
         assert_equals(
-            [call('1234-update-section-timeout', path='request', timeout=1, headers={u'Accept': u'application/json'})],
+            [call('1234-update-section-timeout', path='request', timeout=1)],
             get.call_args_list
         )
 
