@@ -592,7 +592,6 @@ class RunningJob(object):
             if last_known_status != self._status:
                 #update the info cache
                 self.update(info_section='job')
-                self.update(info_section='output')
             self._info['status'] = self._status
 
         return self._status.upper() if self._status else None
