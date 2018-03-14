@@ -79,6 +79,7 @@ class RunningJob(object):
     """RunningJob."""
 
     def __init__(self, job_id, adapter=None, conf=None, info=None):
+        global get_adapter_for_version  # See comment at pygenie/__init__.py:38
         self._cached_genie_log = None
         self._cached_stderr = None
         self._conf = conf or GenieConf()

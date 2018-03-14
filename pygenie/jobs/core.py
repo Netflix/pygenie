@@ -11,9 +11,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 import logging
 import re
-import sys
 
 from collections import defaultdict, OrderedDict
+
+from six import text_type
 
 from ..conf import GenieConf
 from ..utils import (convert_to_unicode,
@@ -194,9 +195,7 @@ class GenieJob(object):
         return self.__unicode__()
 
     def __unicode__(self):
-        if sys.version_info < (3,):
-            return unicode(self.repr_obj)
-        return str(self.repr_obj)
+        return text_type(self.repr_obj)
 
     def _add_dependency(self, dep):
         """
@@ -504,7 +503,7 @@ class GenieJob(object):
             except GenieJobNotFoundError:
                 self.job_id(uid)
 
-        # execute_job is set in main __init__.py to get around circular imports
+        global execute_job  # set in main __init__.py to avoid circular imports
         # execute_job imports jobs, jobs need to import execute_job
         # assigning to running_job variable for killing on signal
         running_job = execute_job(self)

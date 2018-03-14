@@ -4,7 +4,8 @@ import os
 import unittest
 
 from mock import patch
-from nose.tools import assert_equals, assert_raises
+from nose.tools import assert_equals
+from six import text_type
 
 
 assert_equals.__self__.maxDiff = None
@@ -15,7 +16,7 @@ import pygenie
 
 def mock_to_attachment(att):
     if isinstance(att, dict):
-        return {u'name': unicode(att['name']), u'data': unicode(att['data'])}
+        return {u'name': text_type(att['name']), u'data': text_type(att['data'])}
     else:
         return {u'name': os.path.basename(att), u'data': u'file contents'}
 
