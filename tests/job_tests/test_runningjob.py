@@ -688,3 +688,43 @@ class TestingRunningStderr(unittest.TestCase):
         )
 
         assert_equals(chunk, None)
+
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_spark_log')
+    def test_spark_log_chunk(self, get_spark_log, get_info_for_rj):
+        """Test RunningJob() spark_log_chunk"""
+
+        get_info_for_rj.return_value = dict([('spark_log_size', 10)])
+        get_spark_log.return_value = "line1\nline2\nline3\nline4\nline5\nline6"
+
+        running_job = pygenie.jobs.RunningJob('1234-spark-log-chunk',
+                                              info={'status': 'SUCCEEDED'})
+
+        running_job.spark_log_chunk(10, offset=0)
+
+        assert_equals(
+            [
+                call('1234-spark-log-chunk', headers={'Range': 'bytes=0-10'})
+            ],
+            get_spark_log.call_args_list
+        )
+
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_spark_log')
+    def test_spark_log_chunk_zero_size(self, get_spark_log, get_info_for_rj):
+        """Test RunningJob() spark_log_chunk_zero_size"""
+
+        get_info_for_rj.return_value = dict([('spark_log_size', 0)])
+        get_spark_log.return_value = ""
+
+        running_job = pygenie.jobs.RunningJob('1234-spark-log-chunk',
+                                              info={'status': 'SUCCEEDED'})
+
+        chunk = running_job.spark_log_chunk(10, offset=0)
+
+        assert_equals(
+            [],
+            get_spark_log.call_args_list
+        )
+
+        assert_equals(chunk, None)

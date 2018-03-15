@@ -122,7 +122,7 @@ class Genie3Adapter(GenieBaseAdapter):
                             url=url,
                             stream=iterator,
                             auth_handler=self.auth_handler,
-                            failure_codes=404,
+                            failure_codes=[404,406],
                             **kwargs)
             return response.iter_lines() if iterator else response.text
         except GenieHTTPError as err:
@@ -363,6 +363,9 @@ class Genie3Adapter(GenieBaseAdapter):
                 if entry.get('name') == 'stdout':
                     # TODO: Should the default size be None to signify unknown vs 0 byte file?
                     ret['stdout_size'] = entry.get('size') or 0
+                if entry.get('name') == 'spark.log':
+                    # TODO: Should the default size be None to signify unknown vs 0 byte file?
+                    ret['spark_log_size'] = entry.get('size') or 0
         return ret
 
     def get_genie_log(self, job_id, **kwargs):
@@ -392,6 +395,11 @@ class Genie3Adapter(GenieBaseAdapter):
         """Get init failure log for a job."""
 
         return self.get_log(job_id, 'initFailureDetails.txt', **kwargs)
+
+    def get_spark_log(self, job_id, **kwargs):
+        """Get spark log for a job that runs the driver on genie node."""
+
+        return self.get_log(job_id, 'spark.log', **kwargs)
 
     def kill_job(self, job_id=None, kill_uri=None, timeout=30):
         """Kill a job."""

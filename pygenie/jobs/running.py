@@ -845,6 +845,20 @@ class RunningJob(object):
             stdout file size
         """
 
+    @property
+    @get_from_info('spark_log_size', info_section='output')
+    def spark_log_size(self):
+        """
+        Get the size of the spark log file
+
+        Example:
+            >>> running_job.spark_log_size
+            123
+
+        Returns:
+            spark log file size
+        """
+
     def _get_log_chunk(self, length, offset=None, type='stderr', **kwargs):
         log_chunk = ''
 
@@ -863,6 +877,12 @@ class RunningJob(object):
             )
         elif type == 'stdout':
             log_chunk = self._adapter.get_stdout(
+                self._job_id,
+                headers=headers,
+                **kwargs
+            )
+        elif type == 'spark_log':
+            log_chunk = self._adapter.get_spark_log(
                 self._job_id,
                 headers=headers,
                 **kwargs
@@ -904,6 +924,23 @@ class RunningJob(object):
         if self.stdout_size > 0:
             return self._get_log_chunk(length, offset=offset, type='stdout', **kwargs)
 
+    def spark_log_chunk(self, length, offset=None, **kwargs):
+        """
+            Get a chunk of the log file
+            Example:
+            >>> running_job.spark_log_chunk()
+
+        Args:
+            length: Number of bytes to return
+
+            offset: offset for the start of chunk.
+        Returns:
+             If offset is None then return the tail end of file
+             else return log chunk of given length from offset.
+        """
+        if self.spark_log_size > 0:
+            return self._get_log_chunk(length, offset=offset, type='spark_log', **kwargs)
+
     def init_failure_log(self, iterator=False, **kwargs):
         """
         Get the job's init failure details as either an iterator or full text.
@@ -932,3 +969,32 @@ class RunningJob(object):
             return self._adapter.get_init_failure_log(self._job_id,
                                         iterator=iterator,
                                         **kwargs)
+
+    def spark_log(self, iterator=False, **kwargs):
+        """
+        Get spark log for jobs where the driver runs on the genie node
+
+        Example:
+            >>> running_job.spark_log()
+            '...'
+            >>> for l in running_job.spark_log(iterator=True):
+            >>>     print(l)
+
+        Args:
+            iterator (bool, optional): Set to True if want to return as iterator.
+
+        Returns:
+            str or iterator or None.
+        """
+        #unlike other log files this file may not exist, so check first
+        spark_log_exists = False
+        if self.output_data:
+            output_files = self.output_data.get('files') or []
+            for entry in output_files:
+                if entry.get('name') == 'spark.log':
+                    spark_log_exists = True
+
+        if spark_log_exists:
+            return self._adapter.get_spark_log(self._job_id,
+                                                      iterator=iterator,
+                                                      **kwargs)
