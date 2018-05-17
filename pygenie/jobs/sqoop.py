@@ -9,9 +9,8 @@ This module implements creating Sqoop jobs.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
-import sys
 
-from collections import defaultdict
+from six import text_type
 
 from ..utils import unicodify
 from .core import GenieJob
@@ -84,11 +83,7 @@ class SqoopJob(GenieJob):
         for flag in [f for f in self._command_options.keys() if f != '-D']:
             for name, value in self._command_options[flag].items():
                 if value is not None:
-                    if sys.version_info < (3,):
-                        value = unicode(value)
-                    else:
-                        value = str(value)
-                    value = value.replace('\n', ' ')
+                    value = text_type(value).replace('\n', ' ')
                 opts_file = "{opts}{flag}{name}{value}\n" \
                     .format(opts=opts_file,
                             flag=flag,

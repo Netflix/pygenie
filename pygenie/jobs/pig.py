@@ -10,7 +10,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import logging
 import os
-import sys
+
+from six import text_type
 
 from ..utils import unicodify
 from .core import GenieJob
@@ -105,10 +106,7 @@ class PigJob(GenieJob):
         param_file = ""
 
         for name, value in self._parameters.items():
-            if sys.version_info < (3,):
-                value = unicode(value)
-            else:
-                value = str(value)
+            value = text_type(value)
             param_file = '{p}{name} = "{value}"\n' \
                 .format(p=param_file,
                         name=name,

@@ -137,7 +137,7 @@ def call(url, method='get', headers=None, raise_not_status=None, none_on_404=Fal
 def convert_to_unicode(value):
     """Convert value to unicode."""
 
-    if sys.version_info < (3,) and is_str(value) and not isinstance(value, unicode):
+    if sys.version_info < (3,) and is_str(value) and not isinstance(value, unicode):  # noqa
         return value.decode('utf-8')
 
     return value
