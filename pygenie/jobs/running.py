@@ -586,6 +586,8 @@ class RunningJob(object):
         Returns:
             str: Job status.
         """
+        if self._status is None and self.info.get('status'):
+            self._status = self.info.get('status')
 
         if (self._status is None) or (self._status in RUNNING_STATUSES):
             last_known_status = self._status
