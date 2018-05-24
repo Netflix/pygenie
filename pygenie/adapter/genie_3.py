@@ -283,6 +283,8 @@ class Genie3Adapter(GenieBaseAdapter):
             ret['archive_location'] = data.get('archiveLocation')
             ret['attachments'] = None
             ret['command_args'] = data.get('commandArgs')
+            ret['command_name'] = data.get('commandName')
+            ret['cluster_name'] = data.get('clusterName')
             ret['created'] = data.get('created')
             ret['description'] = data.get('description')
             ret['finished'] = data.get('finished')
