@@ -9,6 +9,7 @@ This module contains util functions to be used for jobs.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import inspect
+import json
 import logging
 import os
 import sys
@@ -133,9 +134,9 @@ def arg_list(func):
 
         final = list()
         last = None
-        for item in sorted(attr):
+        for item in sorted([json.dumps(a) for a in attr]):
             if item != last:
-                final.append(item)
+                final.append(json.loads(item))
                 last = item
 
         setattr(self, attr_name, final)
