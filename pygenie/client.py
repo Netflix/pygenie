@@ -113,6 +113,11 @@ class Genie(object):
         self.path_job = self.host \
             + self.conf.genie.get('job_url', '/api/v3/jobs')
 
+    def call(self, *args, **kwargs):
+        if not 'session_adapters' in kwargs:
+            kwargs['session_adapters'] = self.conf.session_adapters
+        return _call(*args, **kwargs)
+
     def get_applications(self, filters=None, req_size=1000):
         """
         Get a list of applications.
@@ -137,7 +142,7 @@ class Genie(object):
         params['page'] = 0
         params['size'] = req_size
         while True:
-            resp = _call(self.path_application, method='GET', params=params)
+            resp = self.call(self.path_application, method='GET', params=params)
 
             if resp:
                 for app in resp['response'].get('applicationList', []):
@@ -173,7 +178,7 @@ class Genie(object):
 
         """
         path = self.path_application + '/' + application_id
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         return resp.get('response')
 
@@ -191,7 +196,7 @@ class Genie(object):
             >>> create_application({'id': 'test'})
 
         """
-        resp = _call(self.path_application, data=application, method='POST',
+        resp = self.call(self.path_application, data=application, method='POST',
                      raise_not_status=201)
 
         return resp['headers']['Location'].split('/')[-1]
@@ -212,7 +217,7 @@ class Genie(object):
 
         """
         path = self.path_application + '/' + application['id']
-        _call(path, data=application, method='PUT', raise_not_status=204)
+        self.call(path, data=application, method='PUT', raise_not_status=204)
 
     def patch_application(self, application_id, patches):
         """
@@ -240,7 +245,7 @@ class Genie(object):
             _check_patch_operation(patch.get('op', 'NOTSET'))
 
         path = self.path_application + '/' + application_id
-        _call(path, data=patches, method='PATCH')
+        self.call(path, data=patches, method='PATCH')
 
     def delete_application(self, application_id):
         """
@@ -256,7 +261,7 @@ class Genie(object):
 
         """
         path = self.path_application + '/' + application_id
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def delete_all_applications(self):
         """
@@ -268,7 +273,7 @@ class Genie(object):
             >>> delete_all_applications()
 
         """
-        _call(self.path_application, method='DELETE')
+        self.call(self.path_application, method='DELETE')
 
     def get_commands_for_application(self, application_id, status=None):
         """
@@ -290,7 +295,7 @@ class Genie(object):
         params = {'status': status}
 
         path = self.path_application + '/' + application_id + '/commands'
-        resp = _call(path, none_on_404=True, params=params) or {}
+        resp = self.call(path, none_on_404=True, params=params) or {}
 
         return resp.get('response', [])
 
@@ -308,7 +313,7 @@ class Genie(object):
 
         """
         path = self.path_application + '/' + application_id + '/configs'
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_configs_for_application(self, application_id):
         """
@@ -326,7 +331,7 @@ class Genie(object):
 
         """
         path = self.path_application + '/' + application_id + '/configs'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         return resp.get('response', [])
 
@@ -350,7 +355,7 @@ class Genie(object):
         """
         _check_type(configs, list)
         path = self.path_application + '/' + application_id + '/configs'
-        _call(path, method='POST', data=configs, raise_not_status=204)
+        self.call(path, method='POST', data=configs, raise_not_status=204)
 
     def update_configs_for_application(self, application_id, configs):
         """
@@ -368,7 +373,7 @@ class Genie(object):
         """
         _check_type(configs, list)
         path = self.path_application + '/' + application_id + '/configs'
-        _call(path, method='PUT', data=configs, raise_not_status=204)
+        self.call(path, method='PUT', data=configs, raise_not_status=204)
 
     def remove_all_dependencies_for_application(self, application_id):
         """
@@ -384,7 +389,7 @@ class Genie(object):
 
         """
         path = self.path_application + '/' + application_id + '/dependencies'
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_dependencies_for_application(self, application_id):
         """
@@ -401,7 +406,7 @@ class Genie(object):
 
         """
         path = self.path_application + '/' + application_id + '/dependencies'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         # Return a dotdict if the response is not empty
         return resp.get('response', [])
@@ -427,7 +432,7 @@ class Genie(object):
         """
         _check_type(dependencies, list)
         path = self.path_application + '/' + application_id + '/dependencies'
-        _call(path, method='POST', data=dependencies, raise_not_status=204)
+        self.call(path, method='POST', data=dependencies, raise_not_status=204)
 
     def update_dependencies_for_application(self, application_id, dependenices):
         """
@@ -445,7 +450,7 @@ class Genie(object):
         """
         _check_type(dependenices, list)
         path = self.path_application + '/' + application_id + '/dependencies'
-        _call(path, method='PUT', data=dependenices, raise_not_status=204)
+        self.call(path, method='PUT', data=dependenices, raise_not_status=204)
 
     def remove_all_tags_for_application(self, application_id):
         """
@@ -461,7 +466,7 @@ class Genie(object):
 
         """
         path = self.path_application + '/' + application_id + '/tags'
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_tags_for_application(self, application_id):
         """
@@ -479,7 +484,7 @@ class Genie(object):
 
         """
         path = self.path_application + '/' + application_id + '/tags'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         return resp.get('response', [])
 
@@ -500,7 +505,7 @@ class Genie(object):
         """
         _check_type(tags, list)
         path = self.path_application + '/' + application_id + '/tags'
-        _call(path, method='POST', data=tags, raise_not_status=204)
+        self.call(path, method='POST', data=tags, raise_not_status=204)
 
     def update_tags_for_application(self, application_id, tags):
         """
@@ -519,7 +524,7 @@ class Genie(object):
         """
         _check_type(tags, list)
         path = self.path_application + '/' + application_id + '/tags'
-        _call(path, method='PUT', data=tags, raise_not_status=204)
+        self.call(path, method='PUT', data=tags, raise_not_status=204)
 
     def remove_tag_for_application(self, application_id, tag):
         """
@@ -536,7 +541,7 @@ class Genie(object):
 
         """
         path = self.path_application + '/' + application_id + '/tags/' + tag
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def create_command(self, command):
         """
@@ -551,7 +556,7 @@ class Genie(object):
         Example: create_command({'id': 'test_command'})
 
         """
-        resp = _call(self.path_command, method='POST', data=command,
+        resp = self.call(self.path_command, method='POST', data=command,
                      raise_not_status=201)
         command = resp['headers']['Location'].split('/')[-1]
 
@@ -571,7 +576,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_command(self, command_id):
         """
@@ -589,7 +594,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         if resp.get('response'):
             return DotDict(resp.get('response'))
@@ -615,7 +620,7 @@ class Genie(object):
             raise GenieError('"id" key missing from command configuration.')
 
         path = self.path_command + '/' + command['id']
-        _call(path, method='PUT', data=command, raise_not_status=204)
+        self.call(path, method='PUT', data=command, raise_not_status=204)
 
     def update_commands_for_cluster(self, cluster_id, commands):
         """
@@ -651,7 +656,7 @@ class Genie(object):
             _check_patch_operation(patch.get('op', 'NOTSET'))
 
         path = self.path_command + '/' + command_id
-        _call(path, data=patches, method='PATCH')
+        self.call(path, data=patches, method='PATCH')
 
     def delete_all_commands(self):
         """
@@ -663,7 +668,7 @@ class Genie(object):
             >>> delete_all_commands()
 
         """
-        _call(self.path_command, method='DELETE', raise_not_status=204)
+        self.call(self.path_command, method='DELETE', raise_not_status=204)
 
     # TODO: Page and size should be separate arguments
     def get_commands(self, filters=None, req_size=1000):
@@ -701,7 +706,7 @@ class Genie(object):
         params['page'] = 0
         params['size'] = req_size
         while True:
-            resp = _call(self.path_command, method='GET', params=params)
+            resp = self.call(self.path_command, method='GET', params=params)
 
             # TODO: Check to see if _imbedded key is missing, then break
             if resp:
@@ -733,7 +738,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_configs_for_command(self, command_id):
         """
@@ -751,7 +756,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id + '/configs'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         return resp.get('response', [])
 
@@ -775,7 +780,7 @@ class Genie(object):
         """
         _check_type(configs, list)
         path = self.path_command + '/' + command_id + '/configs'
-        _call(path, method='POST', data=configs, raise_not_status=204)
+        self.call(path, method='POST', data=configs, raise_not_status=204)
 
     def update_configs_for_command(self, command_id, configs):
         """
@@ -793,7 +798,7 @@ class Genie(object):
         """
         _check_type(configs, list)
         path = self.path_command + '/' + command_id + '/configs'
-        _call(path, method='PUT', data=configs, raise_not_status=204)
+        self.call(path, method='PUT', data=configs, raise_not_status=204)
 
     def remove_all_dependencies_for_command(self, command_id):
         """
@@ -809,7 +814,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id + '/dependencies'
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_dependencies_for_command(self, command_id):
         """
@@ -826,7 +831,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id + '/dependencies'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         # Return a dotdict if the response is not empty
         return resp.get('response', [])
@@ -852,7 +857,7 @@ class Genie(object):
         """
         _check_type(dependencies, list)
         path = self.path_command + '/' + command_id + '/dependencies'
-        _call(path, method='POST', data=dependencies, raise_not_status=204)
+        self.call(path, method='POST', data=dependencies, raise_not_status=204)
 
     def update_dependencies_for_command(self, command_id, dependencies):
         """
@@ -870,7 +875,7 @@ class Genie(object):
         """
         _check_type(dependencies, list)
         path = self.path_command + '/' + command_id + '/dependencies'
-        _call(path, method='PUT', data=dependencies, raise_not_status=204)
+        self.call(path, method='PUT', data=dependencies, raise_not_status=204)
 
     def remove_all_tags_for_command(self, command_id):
         """
@@ -886,7 +891,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id + '/tags'
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_tags_for_command(self, command_id):
         """
@@ -904,7 +909,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id + '/tags'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         return resp.get('response', [])
 
@@ -925,7 +930,7 @@ class Genie(object):
         """
         _check_type(tags, list)
         path = self.path_command + '/' + command_id + '/tags'
-        _call(path, method='POST', data=tags, raise_not_status=204)
+        self.call(path, method='POST', data=tags, raise_not_status=204)
 
     def update_tags_for_command(self, command_id, tags):
         """
@@ -944,7 +949,7 @@ class Genie(object):
         """
         _check_type(tags, list)
         path = self.path_command + '/' + command_id + '/tags'
-        _call(path, method='PUT', data=tags, raise_not_status=204)
+        self.call(path, method='PUT', data=tags, raise_not_status=204)
 
     def remove_tag_for_command(self, command_id, tag):
         """
@@ -961,7 +966,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id + '/tags/' + tag
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def remove_all_applications_for_command(self, command_id):
         """
@@ -977,7 +982,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id + '/applications'
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_applications_for_command(self, command_id):
         """
@@ -995,7 +1000,7 @@ class Genie(object):
 
         """
         path = self.path_command + '/' + command_id + '/applications'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         return resp.get('response', [])
 
@@ -1015,7 +1020,7 @@ class Genie(object):
         """
         _check_type(application_ids, list)
         path = self.path_command + '/' + command_id + '/applications'
-        _call(path, method='POST', data=application_ids, raise_not_status=204)
+        self.call(path, method='POST', data=application_ids, raise_not_status=204)
 
     def set_application_for_command(self, command_id, application_ids):
         """
@@ -1033,7 +1038,7 @@ class Genie(object):
         """
         _check_type(application_ids, list)
         path = self.path_command + '/' + command_id + '/applications'
-        _call(path, method='PUT', data=application_ids, raise_not_status=204)
+        self.call(path, method='PUT', data=application_ids, raise_not_status=204)
 
     def remove_application_for_command(self, command_id, application_id):
         """
@@ -1051,7 +1056,7 @@ class Genie(object):
         """
         path = self.path_command + '/' + command_id + '/applications' + '/' \
                + application_id
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_clusters_for_command(self, command_id, status=None):
         """
@@ -1076,7 +1081,7 @@ class Genie(object):
         _verify_filters(status, ['UP', 'OUT_OF_SERVICE', 'TERMINATED'])
         path = self.path_command + '/' + command_id + '/clusters'
         params = {'status': status}
-        resp = _call(path, none_on_404=True, params=params) or {}
+        resp = self.call(path, none_on_404=True, params=params) or {}
 
         return resp.get('response')
 
@@ -1112,7 +1117,7 @@ class Genie(object):
         params['page'] = 0
         params['size'] = req_size
         while True:
-            resp = _call(self.path_cluster, method='GET', params=params)
+            resp = self.call(self.path_cluster, method='GET', params=params)
 
             if resp:
                 for cluster in resp['response'].get('clusterList', []):
@@ -1145,7 +1150,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/%s' % cluster_id
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         if resp.get('response'):
             return DotDict(resp.get('response'))
@@ -1187,7 +1192,7 @@ class Genie(object):
         if cluster['status'].upper() not in ['TERMINATED', 'OUT_OF_SERVICE', 'UP']:
             raise GenieError('kwarg "status" must be in [TERMINATED, OUT_OF_SERVICE, UP]')
 
-        resp = _call(self.path_cluster, method='POST', data=cluster,
+        resp = self.call(self.path_cluster, method='POST', data=cluster,
                      raise_not_status=201)
 
         cluster_id = resp['headers'].get('Location').split('/')[-1]
@@ -1210,7 +1215,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/' + cluster_id
-        _call(path, method='PUT', data=cluster, raise_not_status=204)
+        self.call(path, method='PUT', data=cluster, raise_not_status=204)
 
     def patch_cluster(self, cluster_id, patches):
         """
@@ -1238,7 +1243,7 @@ class Genie(object):
             _check_patch_operation(patch.get('op', 'NOTSET'))
 
         path = self.path_cluster + '/' + cluster_id
-        _call(path, data=patches, method='PATCH')
+        self.call(path, data=patches, method='PATCH')
 
     def delete_cluster(self, cluster_id):
         """
@@ -1254,7 +1259,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/' + cluster_id
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def delete_all_clusters(self):
         """
@@ -1267,7 +1272,7 @@ class Genie(object):
 
         """
         path = self.path_cluster
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def remove_all_commands_for_cluster(self, cluster_id):
         """
@@ -1283,7 +1288,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/' + cluster_id + '/commands'
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def remove_commands_for_cluster(self, cluster_id, command_id):
         """
@@ -1300,7 +1305,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/' + cluster_id + '/commands/' + command_id
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_commands_for_cluster(self, cluster_id, status=None):
         """
@@ -1325,7 +1330,7 @@ class Genie(object):
         status = status or None
         if status:
             status = {'status': status}
-        resp = _call(path, none_on_404=True, params=status) or {}
+        resp = self.call(path, none_on_404=True, params=status) or {}
 
         # Return dotdict for any commands
         if resp.get('response'):
@@ -1349,7 +1354,7 @@ class Genie(object):
         """
         path = self.path_cluster + '/' + cluster_id + '/commands'
         commands = commands or []
-        _call(path, method='POST', data=commands, raise_not_status=204)
+        self.call(path, method='POST', data=commands, raise_not_status=204)
 
     def set_commands_for_cluster(self, cluster_id, commands):
         """
@@ -1367,7 +1372,7 @@ class Genie(object):
         """
         path = self.path_cluster + '/' + cluster_id + '/commands'
         commands = commands or []
-        _call(path, method='PUT', data=commands, raise_not_status=204)
+        self.call(path, method='PUT', data=commands, raise_not_status=204)
 
     def remove_all_configs_for_cluster(self, cluster_id):
         """
@@ -1383,7 +1388,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/' + cluster_id + '/configs'
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_configs_for_cluster(self, cluster_id):
         """
@@ -1401,7 +1406,7 @@ class Genie(object):
         """
 
         path = self.path_cluster + '/' + cluster_id + '/configs'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         return resp.get('response', [])
 
@@ -1421,7 +1426,7 @@ class Genie(object):
         """
         path = self.path_cluster + '/' + cluster_id + '/configs'
         _check_type(configs, list)
-        _call(path, method='POST', data=configs, raise_not_status=204)
+        self.call(path, method='POST', data=configs, raise_not_status=204)
 
     def update_configs_for_cluster(self, cluster_id, configs):
         """
@@ -1438,7 +1443,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/' + cluster_id + '/configs'
-        _call(path, method='PUT', data=configs, raise_not_status=204)
+        self.call(path, method='PUT', data=configs, raise_not_status=204)
 
     def remove_all_dependencies_for_cluster(self, cluster_id):
         """
@@ -1454,7 +1459,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/' + cluster_id + '/dependencies'
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_dependencies_for_cluster(self, cluster_id):
         """
@@ -1472,7 +1477,7 @@ class Genie(object):
         """
 
         path = self.path_cluster + '/' + cluster_id + '/dependencies'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         return resp.get('response', [])
 
@@ -1492,7 +1497,7 @@ class Genie(object):
         """
         path = self.path_cluster + '/' + cluster_id + '/dependencies'
         _check_type(dependencies, list)
-        _call(path, method='POST', data=dependencies, raise_not_status=204)
+        self.call(path, method='POST', data=dependencies, raise_not_status=204)
 
     def update_dependencies_for_cluster(self, cluster_id, dependencies):
         """
@@ -1509,7 +1514,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/' + cluster_id + '/dependencies'
-        _call(path, method='PUT', data=dependencies, raise_not_status=204)
+        self.call(path, method='PUT', data=dependencies, raise_not_status=204)
 
     def remove_all_tags_for_cluster(self, cluster_id):
         """
@@ -1525,7 +1530,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/' + cluster_id + '/tags'
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_tags_for_cluster(self, cluster_id):
         """
@@ -1543,7 +1548,7 @@ class Genie(object):
 
         """
         path = self.path_cluster + '/' + cluster_id + '/tags'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         return resp.get('response', [])
 
@@ -1563,7 +1568,7 @@ class Genie(object):
         """
         _check_type(tags, list)
         path = self.path_cluster + '/' + cluster_id + '/tags'
-        _call(path, method='POST', data=tags, raise_not_status=204)
+        self.call(path, method='POST', data=tags, raise_not_status=204)
 
     def update_tags_for_cluster(self, cluster_id, tags):
         """
@@ -1579,7 +1584,7 @@ class Genie(object):
         """
         _check_type(tags, list)
         path = self.path_cluster + '/' + cluster_id + '/tags'
-        _call(path, method='PUT', data=tags, raise_not_status=204)
+        self.call(path, method='PUT', data=tags, raise_not_status=204)
 
     def remove_tag_for_cluster(self, cluster_id, tag):
         """
@@ -1597,7 +1602,7 @@ class Genie(object):
         """
         _check_type(tag, str)
         path = self.path_cluster + '/' + cluster_id + '/tags/' + tag
-        _call(path, method='DELETE', raise_not_status=204)
+        self.call(path, method='DELETE', raise_not_status=204)
 
     def get_jobs(self, filters=None, req_size=1000):
         """
@@ -1626,7 +1631,7 @@ class Genie(object):
         params['page'] = 0
         params['size'] = req_size
         while True:
-            resp = _call(self.path_job, method='GET', params=params)
+            resp = self.call(self.path_job, method='GET', params=params)
 
             if resp:
                 for job in resp['response'].get('jobSearchResultList', []):
@@ -1660,7 +1665,7 @@ class Genie(object):
 
         """
         path = self.path_job + '/' + job_id
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         if resp.get('response'):
             return DotDict(resp.get('response'))
@@ -1681,7 +1686,7 @@ class Genie(object):
 
         """
         path = self.path_job + '/' + job_id + '/applications'
-        resp = _call(path, none_on_404=True) or {}
+        resp = self.call(path, none_on_404=True) or {}
 
         return resp.get('response', [])
 
@@ -1701,7 +1706,7 @@ class Genie(object):
 
         """
         path = self.path_job + '/' + job_id + '/cluster'
-        resp = _call(path, none_on_404=True)
+        resp = self.call(path, none_on_404=True)
 
         if resp:
             return DotDict(resp['response'])
@@ -1722,7 +1727,7 @@ class Genie(object):
 
         """
         path = self.path_job + '/' + job_id + '/command'
-        resp = _call(path, none_on_404=True)
+        resp = self.call(path, none_on_404=True)
 
         if resp:
             return DotDict(resp['response'])
@@ -1743,7 +1748,7 @@ class Genie(object):
 
         """
         path = self.path_job + '/' + job_id + '/execution'
-        resp = _call(path, none_on_404=True)
+        resp = self.call(path, none_on_404=True)
 
         if resp:
             return DotDict(resp['response'])
@@ -1764,7 +1769,7 @@ class Genie(object):
 
         """
         path = self.path_job + '/' + job_id + '/output'
-        resp = _call(path, none_on_404=True)
+        resp = self.call(path, none_on_404=True)
 
         if resp:
             return DotDict(resp['response'])
@@ -1785,7 +1790,7 @@ class Genie(object):
 
         """
         path = self.path_job + '/' + job_id + '/request'
-        resp = _call(path, none_on_404=True)
+        resp = self.call(path, none_on_404=True)
 
         if resp:
             return resp.get('response')
@@ -1806,7 +1811,7 @@ class Genie(object):
 
         """
         path = self.path_job + '/' + job_id + '/status'
-        resp = _call(path, none_on_404=True)
+        resp = self.call(path, none_on_404=True)
 
         if resp:
             return resp.get('response')
@@ -1827,6 +1832,6 @@ class Genie(object):
         """
         _check_type(job_parameters, dict)
         path = self.path_job
-        resp = _call(path, method='POST', data=job_parameters)
+        resp = self.call(path, method='POST', data=job_parameters)
 
         return resp['headers']['Location'].split('/')[-1]

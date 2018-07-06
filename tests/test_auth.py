@@ -46,7 +46,7 @@ class TestingAuthHandler(unittest.TestCase):
             True
         )
 
-    @patch('requests.request')
+    @patch('requests.Session.request')
     def test_request_call(self, request):
         """Test request call kwargs for auth."""
 

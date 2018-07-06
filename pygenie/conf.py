@@ -22,6 +22,7 @@ import logging
 import os
 import sys
 
+from collections import OrderedDict
 from configurator import Configurator as C
 
 from .exceptions import GenieConfigOptionError, GenieConfigSectionError
@@ -136,6 +137,17 @@ class GenieConf(object):
             self.load_config_file(self.config_file_home_ini())
         else:
             self._load_options()
+        self._adapters = OrderedDict()
+
+    @property
+    def session_adapters(self):
+        return self._adapters
+
+    def add_session_adapter(self, key, value):
+        self._adapters[key] = value
+
+    def remove_session_adapter(self, key):
+        del self._adapters[key]
 
     def __getattr__(self, attr):
         if attr.startswith('__'): raise AttributeError

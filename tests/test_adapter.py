@@ -63,7 +63,7 @@ class TestStringSubstitution(unittest.TestCase):
 class TestGenie3JobSubmission(unittest.TestCase):
     """Test Genie 3 job submission."""
 
-    @patch('pygenie.utils.requests.request')
+    @patch('requests.sessions.Session.request')
     def test_job_submit(self, request):
         """Test Genie 3 adapter job submit."""
 
@@ -75,7 +75,7 @@ class TestGenie3JobSubmission(unittest.TestCase):
 
         assert_equals(1, request.call_count)
 
-    @patch('pygenie.utils.requests.request')
+    @patch('requests.sessions.Session.request')
     def test_job_submit_409(self, request):
         """Test Genie 3 adapter job submit (409 response)."""
 
@@ -92,7 +92,7 @@ class TestGenie3JobSubmission(unittest.TestCase):
 
         assert_equals(1, request.call_count)
 
-    @patch('pygenie.utils.requests.request')
+    @patch('requests.sessions.Session.request')
     def test_job_submit_various_responses(self, request):
         """Test Genie 3 adapter job submit (various response codes then 202)."""
 
@@ -123,7 +123,7 @@ class TestGenie3JobSubmission(unittest.TestCase):
 class TestGenie3Adapter(unittest.TestCase):
     """Test Genie 3 adapter."""
 
-    @patch('pygenie.utils.requests.request')
+    @patch('requests.sessions.Session.request')
     def test_stderr_log_not_found(self, request):
         """Test Genie 3 adapter getting stderr log which does not exist."""
 
@@ -215,7 +215,7 @@ class TestGenie3Adapter(unittest.TestCase):
             get.call_args_list
         )
 
-    @patch('pygenie.utils.requests.request')
+    @patch('requests.sessions.Session.request')
     def test_get_404(self, request):
         """Test Genie 3 adapter get with if_not_found (404)."""
 
@@ -238,7 +238,7 @@ class TestGenie3Adapter(unittest.TestCase):
             request.call_count
         )
 
-    @patch('pygenie.utils.requests.request')
+    @patch('requests.sessions.Session.request')
     def test_get_500(self, request):
         """Test Genie 3 adapter get with if_not_found (500)."""
 
@@ -287,7 +287,7 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
             adapter = Genie3Adapter(conf=conf)
             assert_equals(True, adapter.disable_timeout)
 
-    @patch('pygenie.adapter.genie_3.call')
+    @patch('pygenie.adapter.genie_x.GenieBaseAdapter.call')
     def test_get_log_disabled_timeout(self, genie_call):
         """Test Genie 3 adapter get_log() (disabled timeout)."""
 
@@ -295,7 +295,7 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
 
         assert_equals(True, 'timeout' not in genie_call.call_args[1])
 
-    @patch('pygenie.adapter.genie_3.call')
+    @patch('pygenie.adapter.genie_x.GenieBaseAdapter.call')
     def test_get_disabled_timeout(self, genie_call):
         """Test Genie 3 adapter get() (disabled timeout)."""
 
@@ -303,7 +303,7 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
 
         assert_equals(True, 'timeout' not in genie_call.call_args[1])
 
-    @patch('pygenie.adapter.genie_3.call')
+    @patch('pygenie.adapter.genie_x.GenieBaseAdapter.call')
     def test_get_info_for_rj_disabled_timeout(self, genie_call):
         """Test Genie 3 adapter get_info_for_rj() (disabled timeout)."""
 
@@ -314,7 +314,7 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
             any([self.has_timeout_in_kwargs(kall[1]) for kall in genie_call.call_args_list])
         )
 
-    @patch('pygenie.adapter.genie_3.call')
+    @patch('pygenie.adapter.genie_x.GenieBaseAdapter.call')
     def test_get_status_disabled_timeout(self, genie_call):
         """Test Genie 3 adapter get_status() (disabled timeout)."""
 
@@ -322,7 +322,7 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
 
         assert_equals(True, 'timeout' not in genie_call.call_args[1])
 
-    @patch('pygenie.adapter.genie_3.call')
+    @patch('pygenie.adapter.genie_x.GenieBaseAdapter.call')
     def test_submit_job_disabled_timeout(self, genie_call):
         """Test Genie 3 adapter submit_job() (disabled timeout)."""
 

@@ -13,7 +13,7 @@ import logging
 from functools import wraps
 
 from ..conf import GenieConf
-
+from ..utils import call
 
 logger = logging.getLogger('com.netflix.genie.jobs.adapter.genie_x')
 
@@ -130,3 +130,8 @@ class GenieBaseAdapter(object):
 
         Submit the job execution to Genie.
         """
+
+    def call(self, *args, **kwargs):
+        if not 'session_adapters' in kwargs:
+            kwargs['session_adapters'] = self._conf.session_adapters
+        return call(*args, **kwargs)
