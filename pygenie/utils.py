@@ -92,14 +92,19 @@ def call(url, method='get', headers=None, raise_not_status=None, none_on_404=Fal
     logger.debug('headers: %s', headers)
 
     errors = list()
+    session = requests.Session()
+    adapters = kwargs.pop('session_adapters', None) or {}
+    for m, adpt in adapters.items():
+        session.mount(m, adpt)
+
     for i in range(attempts):
         try:
-            resp = requests.request(method,
-                                    url=url,
-                                    headers=headers,
-                                    auth=auth_handler.auth,
-                                    *args,
-                                    **kwargs)
+            resp = session.request(method,
+                                   url=url,
+                                   headers=headers,
+                                   auth=auth_handler.auth,
+                                   *args,
+                                   **kwargs)
             if (int(resp.status_code/100) == 2) or (str(resp.status_code) in failure_codes):
                 break
         except (ConnectionError, Timeout, socket.timeout) as err:

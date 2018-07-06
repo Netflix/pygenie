@@ -122,6 +122,37 @@ class TestGenieConf(unittest.TestCase):
     @reset_environment
     @patch('pygenie.conf.GenieConf.config_file_env')
     @patch('pygenie.conf.GenieConf.config_file_home_ini')
+    def test_session_adapters(self, config_home_ini, config_env):
+        """Test configuration to_dict()."""
+
+        config_env.return_value = None
+        config_home_ini.return_value = None
+        genie_conf = GenieConf()
+        genie_conf.load_config_file(self.config_file)
+        genie_conf.add_session_adapter('https://', {})
+        self.assertEqual(genie_conf.session_adapters, {'https://': {}})
+
+        assert_equals(
+            genie_conf.to_dict(),
+            {
+                u'genie': {
+                    u'url': u'http://foo:8080',
+                    u'username': u'user_ini',
+                    u'version': u'3'
+                },
+                'test_genie': {
+                    u'from_env': u'from_ini_1',
+                    u'from_cmd_line': u'from_ini_2',
+                    u'from_ini': u'from_ini_3'
+                }
+            }
+        )
+        genie_conf.remove_session_adapter('https://')
+        self.assertEqual(genie_conf.session_adapters, {})
+
+    @reset_environment
+    @patch('pygenie.conf.GenieConf.config_file_env')
+    @patch('pygenie.conf.GenieConf.config_file_home_ini')
     def test_username_command_line(self, config_home_ini, config_env):
         """Test configuration getting user specified from command line."""
 

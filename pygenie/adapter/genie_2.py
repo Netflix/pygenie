@@ -16,8 +16,7 @@ import os
 from functools import wraps
 from multipledispatch import dispatch
 
-from ..utils import (call,
-                     is_str)
+from ..utils import is_str
 
 from ..jobs.utils import (is_attachment,
                           is_file)
@@ -115,7 +114,7 @@ class Genie2Adapter(GenieBaseAdapter):
             .replace('/genie/v2/jobs/', '/genie-jobs/', 1)
 
         try:
-            response = call(method='get', url=url, stream=iterator, **kwargs)
+            response = self.call(method='get', url=url, stream=iterator, **kwargs)
             return response.iter_lines() if iterator else response.text
         except GenieHTTPError as err:
             if err.response.status_code == 404:
@@ -194,7 +193,7 @@ class Genie2Adapter(GenieBaseAdapter):
             url = '{}/{}'.format(url, path.lstrip('/'))
 
         try:
-            return call(method='get', url=url, **kwargs).json()
+            return self.call(method='get', url=url, **kwargs).json()
         except GenieHTTPError as err:
             if err.response.status_code == 404:
                 raise GenieJobNotFoundError("job not found at {}".format(url))
@@ -271,7 +270,7 @@ class Genie2Adapter(GenieBaseAdapter):
         url = kill_uri if kill_uri is not None else self.__url_for_job(job_id)
 
         try:
-            return call(method='delete', url=url, timeout=10)
+            return self.call(method='delete', url=url, timeout=10)
         except GenieHTTPError as err:
             if err.response.status_code == 404:
                 raise GenieJobNotFoundError("job not found at {}".format(url))
@@ -296,11 +295,11 @@ class Genie2Adapter(GenieBaseAdapter):
                                 sort_keys=True,
                                 indent=4,
                                 separators=(',', ': ')))
-        call(method='post',
-             url='{}/{}'.format(job._conf.genie.url, Genie2Adapter.JOBS_ENDPOINT),
-             timeout=30,
-             data=json.dumps(payload),
-             headers=JSON_HEADERS)
+        self.call(method='post',
+                  url='{}/{}'.format(job._conf.genie.url, Genie2Adapter.JOBS_ENDPOINT),
+                  timeout=30,
+                  data=json.dumps(payload),
+                  headers=JSON_HEADERS)
 
 
 @dispatch(GenieJob, namespace=dispatch_ns)

@@ -22,7 +22,7 @@ from socket import timeout
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
-@patch('pygenie.utils.requests.request')
+@patch('requests.sessions.Session.request')
 class TestCall(unittest.TestCase):
     """Test HTTP request calls to Genie server."""
 

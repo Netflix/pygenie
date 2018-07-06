@@ -21,8 +21,7 @@ except ImportError:
     from urllib.parse import urlparse
 
 from ..auth import AuthHandler
-from ..utils import (call,
-                     is_str)
+from ..utils import is_str
 
 from ..jobs.utils import (is_attachment,
                           is_file)
@@ -118,12 +117,12 @@ class Genie3Adapter(GenieBaseAdapter):
             del kwargs['timeout']
 
         try:
-            response = call(method='get',
-                            url=url,
-                            stream=iterator,
-                            auth_handler=self.auth_handler,
-                            failure_codes=[404,406],
-                            **kwargs)
+            response = self.call(method='get',
+                                 url=url,
+                                 stream=iterator,
+                                 auth_handler=self.auth_handler,
+                                 failure_codes=[404,406],
+                                 **kwargs)
             return response.iter_lines() if iterator else response.text
         except GenieHTTPError as err:
             if err.response.status_code in {404, 406}:
@@ -231,12 +230,12 @@ class Genie3Adapter(GenieBaseAdapter):
 
         try:
             # make HTTP request, do not retry 404s (retry everything else)
-            return call(method='get',
-                        url=url,
-                        auth_handler=self.auth_handler,
-                        failure_codes=404,
-                        **kwargs) \
-                   .json()
+            return self.call(method='get',
+                             url=url,
+                             auth_handler=self.auth_handler,
+                             failure_codes=404,
+                             **kwargs) \
+                       .json()
         except GenieHTTPError as err:
             if err.response.status_code in {404, 500}:
                 msg = "job not found at {}".format(url) \
@@ -409,10 +408,10 @@ class Genie3Adapter(GenieBaseAdapter):
         url = kill_uri if kill_uri is not None else self.__url_for_job(job_id)
 
         try:
-            return call(method='delete',
-                        url=url,
-                        timeout=None if self.disable_timeout else timeout,
-                        auth_handler=self.auth_handler)
+            return self.call(method='delete',
+                             url=url,
+                             timeout=None if self.disable_timeout else timeout,
+                             auth_handler=self.auth_handler)
         except GenieHTTPError as err:
             if err.response.status_code == 404:
                 raise GenieJobNotFoundError("job not found at {}".format(url))
@@ -445,13 +444,13 @@ class Genie3Adapter(GenieBaseAdapter):
                                 indent=4,
                                 separators=(',', ': ')))
 
-        call(method='post',
-             url='{}/{}'.format(job._conf.genie.url, Genie3Adapter.JOBS_ENDPOINT),
-             files=files,
-             timeout=None if self.disable_timeout else timeout,
-             auth_handler=self.auth_handler,
-             failure_codes=409,
-             **kwargs)
+        self.call(method='post',
+                  url='{}/{}'.format(job._conf.genie.url, Genie3Adapter.JOBS_ENDPOINT),
+                  files=files,
+                  timeout=None if self.disable_timeout else timeout,
+                  auth_handler=self.auth_handler,
+                  failure_codes=409,
+                  **kwargs)
 
 
 @dispatch(GenieJob, namespace=dispatch_ns)
