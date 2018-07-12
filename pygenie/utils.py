@@ -51,7 +51,7 @@ class DotDict(dict):
 
 
 def call(url, method='get', headers=None, raise_not_status=None, none_on_404=False,
-         auth_handler=None, failure_codes=None, attempts=5, backoff=5, *args,
+         auth_handler=None, failure_codes=None, attempts=7, backoff=5, *args,
          **kwargs):
     """
     Wrap HTTP request calls to the Genie server.
