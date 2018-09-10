@@ -227,6 +227,8 @@ class GenieJob(object):
         # negate priority so can do sorted(self._cluster_tag_mapping.keys())
         self._cluster_tag_mapping[-int(priority)].extend(tags)
 
+        return self
+
     @unicodify
     def _set_command_option(self, flag, name, value=None):
         """
