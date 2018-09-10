@@ -20,6 +20,38 @@ def set_jobname(job):
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
+class TestingGenieClusterTags(unittest.TestCase):
+    """Test cluster tags for GenieJob."""
+
+    def setUp(self):
+        self.dirname = os.path.dirname(os.path.realpath(__file__))
+
+    def test_add_cluster_tag(self):
+        """Testing adding cluster tags at different priorities."""
+
+        with patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'}):
+            genie3_conf = pygenie.conf.GenieConf() \
+                .load_config_file(os.path.join(self.dirname, 'genie3.ini'))
+
+        job = pygenie.jobs.GenieJob(genie3_conf) \
+            ._add_cluster_tag(['critical'], priority=1) \
+            ._add_cluster_tag(['another_critical'], priority=1) \
+            ._add_cluster_tag(['high'], priority=2) \
+            ._add_cluster_tag(['medium'], priority=3) \
+            ._add_cluster_tag(['low'], priority=4) \
+            .cluster_tags('cluster_1')
+
+        assert_equals(
+            {1: ['critical', 'another_critical', 'cluster_1'],
+             2: ['high'],
+             3: ['medium'],
+             4: ['low'],
+             99999: [u'type:genie']},
+            job._cluster_tag_mapping
+        )
+
+
+@patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
 class TestingGenieJob(unittest.TestCase):
     """Test GenieJob."""
 

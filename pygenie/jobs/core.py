@@ -216,16 +216,17 @@ class GenieJob(object):
             self._configs.append(config)
 
     @unicodify
-    def _add_cluster_tag(self, tags, priority=0):
+    def _add_cluster_tag(self, tags, priority=1):
         """
         Add a cluster tag to level. The priority is the level of precedence when
-        Genie looks for a cluster to use (higher priority = higher precedence).
+        Genie looks for a cluster to use (1 = highest priority, 2 = 2nd highest, etc).
         """
+        # priority=0 should be reserved for internal use
+        assert priority >= 0, "cluster tag priorty must be >= 1"
 
         assert isinstance(tags, list), 'tags should be a list'
 
-        # negate priority so can do sorted(self._cluster_tag_mapping.keys())
-        self._cluster_tag_mapping[-int(priority)].extend(tags)
+        self._cluster_tag_mapping[priority].extend(tags)
 
         return self
 
