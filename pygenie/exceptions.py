@@ -49,10 +49,9 @@ class GenieHTTPError(GenieError):
     """Error when sending a request to the server."""
 
     def __init__(self, response):
-        super(GenieHTTPError, self).__init__('{}: {}, {}' \
+        super(GenieHTTPError, self).__init__('{}: {}' \
                                                  .format(response.status_code,
-                                                         response.reason,
-                                                         response.content))
+                                                         response.reason))
         self.response = response
 
 
