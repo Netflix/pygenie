@@ -26,7 +26,7 @@ with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
 
 setup(
     name='nflx-genie-client',
-    version='3.6.1',
+    versioning='devcommit',
     author='Netflix Inc.',
     author_email='genieoss@googlegroups.com',
     keywords='genie hadoop cloud netflix client bigdata presto',
@@ -50,6 +50,7 @@ setup(
         "requests",
         "six"
     ],
+    setup_requires=['setupmeta'],
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         # How mature is this project? Common values are
