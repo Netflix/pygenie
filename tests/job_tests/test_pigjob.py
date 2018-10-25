@@ -432,14 +432,10 @@ class TestingPigJobAdapters(unittest.TestCase):
                     {'tags': ['type:pig_cluster_1']},
                     {'tags': ['type:pig']}
                 ],
-                'commandArgs': ' '.join([
-                    '-Dmr.p1=a -Dmr.p2=b',
-                    '-P my_properties_local.conf -P my_properties.conf',
-                    '-param_file pig_param1.params',
-                    '-param_file pig_param2.params',
-                    '-param_file _pig_parameters.txt',
-                    '-f script.pig'
-                ]),
+                'commandArgs': '-Dmr.p1=a -Dmr.p2=b '
+                               '-P my_properties.conf -P my_properties_local.conf '
+                               '-param_file pig_param1.params -param_file pig_param2.params -param_file _pig_parameters.txt '
+                               '-f script.pig',
                 'commandCriteria': ['type:pig'],
                 'dependencies': [
                     'x://externalfile',

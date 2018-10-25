@@ -405,7 +405,7 @@ class TestingHiveJobAdapters(unittest.TestCase):
                     {'tags': ['type:hive.cluster-1', 'type:hive.cluster-2']},
                     {'tags': ['type:hive']}
                 ],
-                'commandArgs': '-i properties_local.conf -i properties.conf  -i _hive_parameters.txt -f script.hive',
+                'commandArgs': '-i properties.conf -i properties_local.conf  -i _hive_parameters.txt -f script.hive',
                 'commandCriteria': ['type:hive.cmd.1', 'type:hive.cmd.2'],
                 'dependencies': ['x://properties.conf'],
                 'description': 'this job is to test hivejob adapter',

@@ -133,13 +133,11 @@ def arg_list(func):
         attr.extend(str_to_list(value))
 
         final = list()
-        last = None
-        for item in sorted([json.dumps(a) for a in attr]):
-            if item != last:
-                final.append(json.loads(item))
-                last = item
+        for item in [json.dumps(a, sort_keys=True) for a in attr]:
+            if item not in final:
+                final.append(item)
 
-        setattr(self, attr_name, final)
+        setattr(self, attr_name, [json.loads(i) for i in final])
 
         return func(*args, **kwargs) or self
 

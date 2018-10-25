@@ -54,8 +54,8 @@ class TestArgList(unittest.TestCase):
             arglist.my_list
         )
 
-    def test_duplicates(self):
-        """Test pygenie.jobs.utils.arg_list with duplicate arguments."""
+    def test_duplicates_strs(self):
+        """Test pygenie.jobs.utils.arg_list with duplicate arguments (strings)."""
 
         arglist = ArgList()
         arglist.add_to_list('f')
@@ -63,7 +63,7 @@ class TestArgList(unittest.TestCase):
         arglist.add_to_list('f')
 
         assert_equals(
-            ['e', 'f'],
+            ['f', 'e'],
             arglist.my_list
         )
 
@@ -76,6 +76,6 @@ class TestArgList(unittest.TestCase):
         arglist.add_to_list('f')
 
         assert_equals(
-            ["f", "g", {"h": "h"}],
+            ["g", {"h": "h"}, "f"],
             arglist.my_list
         )
