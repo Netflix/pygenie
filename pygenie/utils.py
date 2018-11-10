@@ -12,6 +12,7 @@ import datetime
 import json
 import logging
 import pkg_resources
+import re
 import six
 import socket
 import sys
@@ -38,6 +39,8 @@ USER_AGENT_HEADER = {
         pkg_resources.get_distribution('nflx-genie-client').version
     ])
 }
+
+PRIVATE_RE = re.compile('private|password|secret')
 
 
 class DotDict(dict):
@@ -139,8 +142,11 @@ def call(url, method='get', headers=None, raise_not_status=None, none_on_404=Fal
         raise errors[-1]
 
 
-def convert_to_unicode(value):
+def convert_to_unicode(value, redact_hint=None):
     """Convert value to unicode."""
+
+    if redact_hint and PRIVATE_RE.search(redact_hint.lower()):
+        return 'REDACTED'
 
     if sys.version_info < (3,) and is_str(value) and not isinstance(value, unicode):  # noqa
         return value.decode('utf-8')

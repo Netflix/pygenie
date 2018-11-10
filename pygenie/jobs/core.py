@@ -86,13 +86,22 @@ class Repr(object):
 
         if args is not None:
             results = list()
-            for arg in [convert_to_unicode(a) for a in args]:
+
+            redact_hint=None
+            if len(args) > 0 and len(args) % 2 is 0 and is_str(args[0]):
+                redact_hint = args[0]
+
+            for i, arg in enumerate([convert_to_unicode(a) for a in args]):
                 value = arg
                 if isinstance(arg, list):
                     value = normalize_list(arg)
-                results.append('{qu}{val}{qu}' \
-                    .format(val=value,
-                            qu=self.__quote(value) if is_str(arg) else ''))
+                if i > 0 and is_str(value):
+                    value = convert_to_unicode(value, redact_hint)
+
+                results.append('{qu}{val}{qu}'.format(
+                    val=value,
+                    qu=self.__quote(value) if is_str(arg) else ''
+                ))
             return ', '.join(results)
 
         return ''
@@ -101,10 +110,11 @@ class Repr(object):
         """Convert kwargs dict to string."""
 
         return ', '.join([
-            '{key}={qu}{val}{qu}' \
-                .format(key=key,
-                        val=val,
-                        qu=self.__quote(val) if is_str(val) else '')
+            '{key}={qu}{val}{qu}'.format(
+                key=key,
+                val=convert_to_unicode(val, key) if is_str(val) else val,
+                qu=self.__quote(val) if is_str(val) else ''
+            )
             for key, val in kwargs.items()
         ]) if kwargs is not None else ''
 

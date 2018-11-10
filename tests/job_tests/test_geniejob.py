@@ -117,7 +117,7 @@ class TestingGenieJobRepr(unittest.TestCase):
             .job_version('1.1.1') \
             .parameter('param1', 'pval1') \
             .parameter('param2', 'pval2') \
-            .parameters(param3='pval3', param4='pval4') \
+            .parameters(param3='pval3', param4='pval4', secret="mysecret") \
             .post_cmd_args('post1') \
             .post_cmd_args(['post2', 'post3']) \
             .tags('tag1') \
@@ -152,6 +152,7 @@ class TestingGenieJobRepr(unittest.TestCase):
                 'parameter("param2", "pval2")',
                 'parameter("param3", "pval3")',
                 'parameter("param4", "pval4")',
+                'parameter("secret", "REDACTED")',
                 'post_cmd_args("post1")',
                 'post_cmd_args(["post2", "post3"])',
                 'tags("tag1")',

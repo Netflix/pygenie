@@ -138,7 +138,7 @@ class TestingSqoopJobRepr(unittest.TestCase):
                 'option("debug", None)',
                 'option("foo", "fizz")',
                 'option("hello", "world")',
-                'option("password", "1234")',
+                'option("password", "REDACTED")',
                 'option("split-by", "col_a")',
                 'option("table", "test_table")',
                 'option("target-dir", "/path/to/test/output")',
