@@ -523,6 +523,39 @@ class TestingRunningStderr(unittest.TestCase):
             get_stderr.call_args_list
         )
 
+    @patch('pygenie.jobs.running.RunningJob.update')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stderr')
+    @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
+    def test_override_stderr_params(self, get_status, get_stderr, update):
+        """Test RunningJob() updating stderr."""
+
+        get_status.side_effect = [
+            'RUNNING',
+            'RUNNING',
+            'SUCCEEDED',
+            'SUCCEEDED'
+        ]
+        get_stderr.side_effect = [
+            "line1\nline2\n",
+            "line3\nline4\n",
+            "line5\nline6\n"
+        ]
+
+        running_job = pygenie.jobs.RunningJob('1234-update-stderr',
+                                              info={'status': 'RUNNING'})
+
+        for i in range(10):
+            running_job.stderr(timeout=1)
+
+        assert_equals(
+            [
+                call('1234-update-stderr', headers=None, timeout=1),
+                call('1234-update-stderr', headers={'Range': 'bytes=12-'}, timeout=1),
+                call('1234-update-stderr', headers={'Range': 'bytes=24-'}, timeout=1)
+            ],
+            get_stderr.call_args_list
+        )
+
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stderr')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     def test_stderr_running(self, get_status, get_stderr):
