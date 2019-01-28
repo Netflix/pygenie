@@ -643,7 +643,7 @@ class RunningJob(object):
             str or iterator.
         """
 
-        self._update_stderr()
+        self._update_stderr(**kwargs)
 
         return self._cached_stderr.split('\n') if iterator \
             else self._cached_stderr
