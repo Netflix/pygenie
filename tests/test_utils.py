@@ -9,7 +9,8 @@ from nose.tools import (assert_raises,
 from pygenie.utils import (call,
                            str_to_list)
 from pygenie.jobs.utils import (generate_job_id,
-                                reattach_job)
+                                reattach_job,
+                                is_file)
 
 from pygenie.exceptions import (GenieHTTPError,
                                 GenieJobNotFoundError)
@@ -401,3 +402,12 @@ class TestGeneratingJobId(unittest.TestCase):
         ]
 
         assert_equals(job_id+'-4', generate_job_id(job_id, return_success=False))
+
+    def test_is_file_for_valid_s3path(self):
+        path = 's3://root/myfile'
+        assert_equals(is_file(path), True)
+
+    def test_is_file_for_s3path_with_null_bytes(self):
+        # simulate https://github.com/python/cpython/pull/7695
+        path = 's3://root/myfile\x00'
+        assert_equals(is_file(path), False)
