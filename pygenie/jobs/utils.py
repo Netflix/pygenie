@@ -224,10 +224,16 @@ def is_file(path):
 
     path = convert_to_unicode(path)
 
-    return path is not None and \
-        (os.path.isfile(path) \
-         or path.startswith('s3://') \
-         or path.startswith('s3n://'))
+    try:
+        return path is not None and \
+            (os.path.isfile(path) \
+            or path.startswith('s3://') \
+            or path.startswith('s3n://'))
+    except (ValueError, TypeError):
+        # Py2 throws TypeError and Py3 ValueError
+        # if os.path.isfile encounters invalid path
+        # ref https://github.com/python/cpython/pull/7695
+        return False
 
 
 def reattach_job(job_id, conf=None):
