@@ -27,7 +27,11 @@ RUNNING_STATUSES = {
     'INIT',
     'RUNNING',
     'init',
-    'running'
+    'running',
+    'RESERVED',
+    'ACCEPTED',
+    'RESOLVED',
+    'CLAIMED'
 }
 
 INFO_SECTIONS = {
