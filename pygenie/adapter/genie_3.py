@@ -380,7 +380,7 @@ class Genie3Adapter(GenieBaseAdapter):
         return self.get(job_id,
                         path='status',
                         timeout=None if self.disable_timeout else timeout) \
-               .get('status')
+               .get('status').upper()
 
     def get_stderr(self, job_id, **kwargs):
         """Get a stderr log for a job."""

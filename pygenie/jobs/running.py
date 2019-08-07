@@ -26,8 +26,10 @@ logger = logging.getLogger('com.netflix.genie.jobs.running')
 RUNNING_STATUSES = {
     'INIT',
     'RUNNING',
-    'init',
-    'running'
+    'RESERVED',
+    'ACCEPTED',
+    'RESOLVED',
+    'CLAIMED'
 }
 
 INFO_SECTIONS = {
@@ -263,7 +265,7 @@ class RunningJob(object):
             int: The finish time in epoch (milliseconds).
         """
 
-        status = self.status
+        status = self.status.upper()
 
         if ('finished' not in self.info) \
                 or status in RUNNING_STATUSES \
@@ -587,7 +589,7 @@ class RunningJob(object):
             str: Job status.
         """
         if self._status is None and self.info.get('status'):
-            self._status = self.info.get('status')
+            self._status = self.info.get('status').upper()
 
         if (self._status is None) or (self._status in RUNNING_STATUSES):
             last_known_status = self._status

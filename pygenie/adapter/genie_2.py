@@ -252,7 +252,7 @@ class Genie2Adapter(GenieBaseAdapter):
     def get_status(self, job_id):
         """Get job status."""
 
-        return self.get(job_id, path='status', timeout=10).get('status')
+        return self.get(job_id, path='status', timeout=10).get('status').upper()
 
     def get_stderr(self, job_id, **kwargs):
         """Get a stderr log for a job."""
