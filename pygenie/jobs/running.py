@@ -26,8 +26,6 @@ logger = logging.getLogger('com.netflix.genie.jobs.running')
 RUNNING_STATUSES = {
     'INIT',
     'RUNNING',
-    'init',
-    'running',
     'RESERVED',
     'ACCEPTED',
     'RESOLVED',
@@ -89,7 +87,7 @@ class RunningJob(object):
         self._conf = conf or GenieConf()
         self._info = info or dict()
         self._job_id = job_id
-        self._status = self._info.get('status') or None
+        self._status = self._info.get('status').upper() or None
         self._sys_stream = None
 
         # get_adapter_version is set in main __init__.py to get around circular imports
@@ -267,7 +265,7 @@ class RunningJob(object):
             int: The finish time in epoch (milliseconds).
         """
 
-        status = self.status
+        status = self.status.upper()
 
         if ('finished' not in self.info) \
                 or status in RUNNING_STATUSES \
@@ -591,7 +589,7 @@ class RunningJob(object):
             str: Job status.
         """
         if self._status is None and self.info.get('status'):
-            self._status = self.info.get('status')
+            self._status = self.info.get('status').upper()
 
         if (self._status is None) or (self._status in RUNNING_STATUSES):
             last_known_status = self._status
