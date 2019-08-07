@@ -87,7 +87,7 @@ class RunningJob(object):
         self._conf = conf or GenieConf()
         self._info = info or dict()
         self._job_id = job_id
-        self._status = self._info.get('status').upper() or None
+        self._status = self._info.get('status') or None
         self._sys_stream = None
 
         # get_adapter_version is set in main __init__.py to get around circular imports
