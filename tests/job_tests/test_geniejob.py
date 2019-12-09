@@ -334,6 +334,25 @@ class TestingJobExecute(unittest.TestCase):
         exec_job.assert_called_once_with(job)
         assert_equals(new_job_id, job._job_id)
 
+    @patch('pygenie.jobs.core.reattach_job')
+    @patch('pygenie.jobs.core.generate_job_id')
+    @patch('pygenie.jobs.core.execute_job')
+    def test_job_execute_with_custom_headers(self, exec_job, gen_job_id, reattach_job):
+        """Testing job execution with custom headers."""
+
+        headers = {'genie-force-agent-execution': 'true'}
+
+        job = pygenie.jobs.HiveJob() \
+            .job_id('exec') \
+            .genie_username('exectester') \
+            .script('select * from db.table')
+
+        job.execute(headers=headers)
+
+        gen_job_id.assert_not_called()
+        reattach_job.assert_not_called()
+        exec_job.assert_called_once_with(job, headers=headers)
+
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
 class TestingSetJobId(unittest.TestCase):

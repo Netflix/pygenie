@@ -276,7 +276,7 @@ class Genie2Adapter(GenieBaseAdapter):
                 raise GenieJobNotFoundError("job not found at {}".format(url))
             raise
 
-    def submit_job(self, job):
+    def submit_job(self, job, **kwargs):
         """Submit a job execution to the server."""
 
         payload = {

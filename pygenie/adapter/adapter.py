@@ -35,7 +35,7 @@ def get_adapter_for_version(version):
     raise GenieAdapterError("no adapter for version '{}'".format(version))
 
 
-def execute_job(job):
+def execute_job(job, **kwargs):
     """
     Take a job and convert it to a JSON payload based on the job's
     configuration object's Genie version value and execute.
@@ -49,7 +49,7 @@ def execute_job(job):
 
     if adapter is not None:
         try:
-            adapter.submit_job(job)
+            adapter.submit_job(job, **kwargs)
         except GenieHTTPError as err:
             if err.response.status_code == 409:
                 logger.debug("reattaching to job id '%s'", job.get('job_id'))
