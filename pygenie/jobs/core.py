@@ -458,7 +458,7 @@ class GenieJob(object):
 
         return self.archive(False)
 
-    def execute(self, retry=False, force=False, catch_signal=False):
+    def execute(self, retry=False, force=False, catch_signal=False, **kwargs):
         """
         Send the job to Genie and execute.
 
@@ -519,7 +519,7 @@ class GenieJob(object):
         global execute_job  # set in main __init__.py to avoid circular imports
         # execute_job imports jobs, jobs need to import execute_job
         # assigning to running_job variable for killing on signal
-        running_job = execute_job(self)
+        running_job = execute_job(self, **kwargs)
         return running_job
 
     @add_to_repr('overwrite')
