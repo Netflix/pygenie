@@ -28,6 +28,13 @@ from ..exceptions import GenieJobNotFoundError
 
 logger = logging.getLogger('com.netflix.genie.jobs.utils')
 
+try:
+    getargspec = inspect.getfullargspec
+except AttributeError:
+    # py2 compatible
+    getargspec = inspect.getargspec
+
+
 REPR_APPEND_MODES = {
     'append',
     'insert'
@@ -121,7 +128,7 @@ def arg_list(func):
 
         assert len(args) == 2, 'incorrect arguments to {}()'.format(func.__name__)
 
-        attr_name = inspect.getargspec(func).args[1]
+        attr_name = getargspec(func).args[1]
         self = args[0]
         value = args[1]
 
@@ -156,8 +163,7 @@ def arg_string(func):
         """Set arg to object's attribute as a string."""
 
         assert len(args) == 2, 'incorrect arguments to {}()'.format(func.__name__)
-
-        attr_name = inspect.getargspec(func).args[1]
+        attr_name = getargspec(func).args[1]
         self = args[0]
         value = args[1]
 
