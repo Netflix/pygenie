@@ -18,7 +18,7 @@ from functools import wraps
 from ..conf import GenieConf
 from ..utils import dttm_to_epoch
 
-from ..exceptions import JobTimeoutError
+from ..exceptions import JobTimeoutError, GenieHTTPError
 
 
 logger = logging.getLogger('com.netflix.genie.jobs.running')
@@ -612,11 +612,23 @@ class RunningJob(object):
 
             logger.debug('getting stderr (headers -> %s)', headers)
 
-            stderr_part = self._adapter.get_stderr(
-                self._job_id,
-                headers=headers,
-                **kwargs
-            )
+            try:
+                stderr_part = self._adapter.get_stderr(
+                    self._job_id,
+                    headers=headers,
+                    **kwargs
+                )
+            except GenieHTTPError as e:
+                # HACK: assumes we are getting this because
+                # stderr hasn't changed so we are exceeding
+                # total size. Would be more corrct to parse
+                # and check the Content-Range header from
+                # the response and potentially retry with
+                # a different range
+                if e.response and e.response.status_code == 416:
+                    stderr_part = ""
+                else:
+                    raise
 
             if self._cached_stderr is None:
                 self._cached_stderr = stderr_part

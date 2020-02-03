@@ -121,7 +121,7 @@ class Genie3Adapter(GenieBaseAdapter):
                                  url=url,
                                  stream=iterator,
                                  auth_handler=self.auth_handler,
-                                 failure_codes=[404,406],
+                                 failure_codes=[404,406,416],
                                  **kwargs)
             return response.iter_lines() if iterator else response.text
         except GenieHTTPError as err:
