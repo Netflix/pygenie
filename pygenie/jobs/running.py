@@ -625,7 +625,7 @@ class RunningJob(object):
                 # and check the Content-Range header from
                 # the response and potentially retry with
                 # a different range
-                if e.response and e.response.status_code == 416:
+                if e.response is not None and e.response.status_code == 416:
                     stderr_part = ""
                 else:
                     raise
