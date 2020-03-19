@@ -70,7 +70,8 @@ class PrestoJob(GenieJob):
             self._add_dependency(self._script)
         elif self._script is not None:
             if not self._script.strip().endswith(';'):
-                self._script = '{};'.format(self._script)
+                #\n ensures if the script ends with a comment ; still gets applied
+                self._script = '{}\n;'.format(self._script)
             self._add_dependency({'name': filename, 'data': self._script})
 
         options_str = ' '.join([
