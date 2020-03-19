@@ -242,7 +242,7 @@ class TestingPrestoJobAdapters(unittest.TestCase):
                 u'attachments': [
                     {u'name': u'prestofile1', u'data': u'file contents'},
                     {u'name': u'prestofile2', u'data': u'file contents'},
-                    {u'name': u'script.presto', u'data': u'SELECT * FROM DUAL;'}
+                    {u'name': u'script.presto', u'data': u'SELECT * FROM DUAL\n;'}
                 ],
                 u'clusterCriterias': [
                     {u'tags': [u'type:prestocluster1']},
@@ -351,7 +351,7 @@ class TestingPrestoJobAdapters(unittest.TestCase):
                 u'attachments': [
                     (u'prestofile1', u"open file '/prestofile1'"),
                     (u'prestofile2', u"open file '/prestofile2'"),
-                    (u'script.presto', u'SELECT * FROM DUAL;')
+                    (u'script.presto', u'SELECT * FROM DUAL\n;')
                 ],
                 u'clusterCriterias': [
                     {u'tags': [u'type:prestocluster1']},
