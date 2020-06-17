@@ -6,7 +6,7 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
-install: pip install -- upgrade flake8 tox tox-travis
+install: pip install --upgrade flake8 tox tox-travis
 before_script: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 script: tox
 deploy:
