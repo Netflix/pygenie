@@ -88,7 +88,7 @@ class Repr(object):
             results = list()
 
             redact_hint=None
-            if len(args) > 0 and len(args) % 2 is 0 and is_str(args[0]):
+            if len(args) > 0 and len(args) % 2 == 0 and is_str(args[0]):
                 redact_hint = args[0]
 
             for i, arg in enumerate([convert_to_unicode(a) for a in args]):
