@@ -8,6 +8,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+env*/
 venv/
 bin/
 build/
@@ -66,3 +67,6 @@ subprojects
 
 .DS_Store
 temp.py
+
+#pyenv 
+.python-version
