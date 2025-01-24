@@ -48,7 +48,8 @@ setup(
         "pyconfigurator",
         "python-dateutil >= 2.4",
         "requests",
-        "six"
+        "six",
+        "importlib-metadata",
     ],
     setup_requires=['setupmeta'],
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers

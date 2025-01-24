@@ -11,7 +11,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import datetime
 import json
 import logging
-import pkg_resources
 import re
 import six
 import socket
@@ -20,6 +19,7 @@ import time
 import uuid
 
 from functools import wraps
+from importlib_metadata import version
 
 import requests
 
@@ -36,7 +36,7 @@ USER_AGENT_HEADER = {
     'user-agent': '/'.join([
         socket.getfqdn(),
         'nflx-genie-client',
-        pkg_resources.get_distribution('nflx-genie-client').version
+        version('nflx-genie-client')
     ])
 }
 
