@@ -1,17 +1,13 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 import unittest
 
+import pytest
 from mock import patch
-from nose.tools import assert_equals, assert_raises, assert_true
 
 import pygenie
-
-from ..utils import FakeRunningJob
-
-
-assert_equals.__self__.maxDiff = None
 
 
 @pygenie.adapter.genie_3.set_jobname
@@ -41,14 +37,13 @@ class TestingGenieClusterTags(unittest.TestCase):
             ._add_cluster_tag(['low'], priority=4) \
             .cluster_tags('cluster_1')
 
-        assert_equals(
+        assert (
             {1: ['critical', 'another_critical', 'cluster_1'],
              2: ['high'],
              3: ['medium'],
              4: ['low'],
-             99999: [u'type:genie']},
-            job._cluster_tag_mapping
-        )
+             99999: [u'type:genie']} ==
+            job._cluster_tag_mapping)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -60,10 +55,9 @@ class TestingGenieJob(unittest.TestCase):
 
         job = pygenie.jobs.GenieJob()
 
-        assert_equals(
-            job.get('default_command_tags'),
-            [u'type:genie']
-        )
+        assert (
+            job.get('default_command_tags') ==
+            [u'type:genie'])
 
     def test_cmd_args_explicit(self):
         """Test GenieJob explicit cmd args."""
@@ -71,15 +65,14 @@ class TestingGenieJob(unittest.TestCase):
         job = pygenie.jobs.GenieJob() \
             .command_arguments('explicitly stating command args')
 
-        assert_equals(
-            job.cmd_args,
-            u'explicitly stating command args'
-        )
+        assert (
+            job.cmd_args ==
+            u'explicitly stating command args')
 
     def test_cmd_args_constructed(self):
         """Test GenieJob constructed cmd args."""
 
-        with assert_raises(pygenie.exceptions.GenieJobError) as cm:
+        with pytest.raises(pygenie.exceptions.GenieJobError) as cm:
             pygenie.jobs.GenieJob().cmd_args
 
 
@@ -124,8 +117,8 @@ class TestingGenieJobRepr(unittest.TestCase):
             .tags(['tag3', 'tag4']) \
             .tags('tag2')
 
-        assert_equals(
-            str(job),
+        assert (
+            str(job) ==
             '.'.join([
                 'GenieJob()',
                 'applications("app1")',
@@ -158,8 +151,7 @@ class TestingGenieJobRepr(unittest.TestCase):
                 'tags("tag1")',
                 'tags("tag2")',
                 'tags(["tag3", "tag4"])'
-            ])
-        )
+            ]))
 
     def test_genie_cpu(self):
         """Test GenieJob repr (genie_cpu)."""
@@ -169,15 +161,14 @@ class TestingGenieJobRepr(unittest.TestCase):
             .genie_username('user') \
             .genie_cpu(12)
 
-        assert_equals(
+        assert (
             '.'.join([
                 'GenieJob()',
                 'genie_cpu(12)',
                 'genie_username("user")',
                 'job_id("123")'
-            ]),
-            str(job)
-        )
+            ]) ==
+            str(job))
 
     def test_genie_memory(self):
         """Test GenieJob repr (genie_memory)."""
@@ -187,15 +178,14 @@ class TestingGenieJobRepr(unittest.TestCase):
             .genie_username('user') \
             .genie_memory(7000)
 
-        assert_equals(
+        assert (
             '.'.join([
                 'GenieJob()',
                 'genie_memory(7000)',
                 'genie_username("user")',
                 'job_id("123")'
-            ]),
-            str(job)
-        )
+            ]) ==
+            str(job))
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -232,8 +222,8 @@ class TestingGenieJobAdapters(unittest.TestCase):
             .tags('tag1, tag2') \
             .job_version('0.0.1alpha')
 
-        assert_equals(
-            pygenie.adapter.genie_3.get_payload(job),
+        assert (
+            pygenie.adapter.genie_3.get_payload(job) ==
             {
                 'applications': ['applicationid1'],
                 'attachments': [],
@@ -257,8 +247,7 @@ class TestingGenieJobAdapters(unittest.TestCase):
                 'timeout': 100,
                 'user': 'jdoe',
                 'version': '0.0.1alpha'
-            }
-        )
+            })
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -306,7 +295,7 @@ class TestingJobExecute(unittest.TestCase):
                                            conf=job._conf)
         reattach_job.assert_called_once_with(new_job_id, conf=job._conf)
         exec_job.assert_called_once_with(job)
-        assert_equals(new_job_id, job._job_id)
+        assert new_job_id == job._job_id
 
     @patch('pygenie.jobs.core.reattach_job')
     @patch('pygenie.jobs.core.generate_job_id')
@@ -332,7 +321,7 @@ class TestingJobExecute(unittest.TestCase):
                                            conf=job._conf)
         reattach_job.assert_called_once_with(new_job_id, conf=job._conf)
         exec_job.assert_called_once_with(job)
-        assert_equals(new_job_id, job._job_id)
+        assert new_job_id == job._job_id
 
     @patch('pygenie.jobs.core.reattach_job')
     @patch('pygenie.jobs.core.generate_job_id')
@@ -361,13 +350,13 @@ class TestingSetJobId(unittest.TestCase):
     def test_job_id_empty_string(self):
         """Test setting job id empty string ('')."""
 
-        with assert_raises(AssertionError) as cm:
+        with pytest.raises(AssertionError) as cm:
             job = pygenie.jobs.GenieJob().job_id('')
 
     def test_job_id_none(self):
         """Test setting job id None."""
 
-        with assert_raises(AssertionError) as cm:
+        with pytest.raises(AssertionError) as cm:
             job = pygenie.jobs.GenieJob().job_id(None)
 
     def test_job_id(self):
@@ -375,10 +364,9 @@ class TestingSetJobId(unittest.TestCase):
 
         job = pygenie.jobs.GenieJob().job_id('job-id-1234')
 
-        assert_equals(
-            'job-id-1234',
-            job._job_id
-        )
+        assert (
+            'job-id-1234' ==
+            job._job_id)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -388,22 +376,19 @@ class TestingSetJobName(unittest.TestCase):
     def test_set_job_name_script(self):
         """Test setting job name from script file name."""
 
-        assert_equals(
-            {'name': 'user.HiveJob.Script.FILE_NAME'},
+        assert (
+            {'name': 'user.HiveJob.Script.FILE_NAME'} ==
             set_jobname(pygenie.jobs.HiveJob() \
-                .script('s3://path/to/file/file_name.hive').username('user'))
-        )
+                .script('s3://path/to/file/file_name.hive').username('user')))
 
     def test_set_job_name_query(self):
         """Test setting job name for query string set as script"""
 
-        assert_true(
-            'user.PrestoJob.Query' in
+        assert ('user.PrestoJob.Query' in
             set_jobname(pygenie.jobs.PrestoJob() \
                         .script('select * from db.table').username('user')).get(
                 'name', ''
-            )
-        )
+            ))
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -418,10 +403,9 @@ class TestingSetGenieUrl(unittest.TestCase):
         job = pygenie.jobs.GenieJob() \
             .genie_url(url)
 
-        assert_equals(
-            url,
-            job._conf.genie.url
-        )
+        assert (
+            url ==
+            job._conf.genie.url)
 
     def test_set_genie_url_trailing_slash(self):
         """Test setting genie url with trailing slash."""
@@ -432,10 +416,9 @@ class TestingSetGenieUrl(unittest.TestCase):
         job = pygenie.jobs.GenieJob() \
             .genie_url(url)
 
-        assert_equals(
-            url_clean,
-            job._conf.genie.url
-        )
+        assert (
+            url_clean ==
+            job._conf.genie.url)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -451,15 +434,14 @@ class TestingGrouping(unittest.TestCase):
             .genie_grouping('test_group_repr_1') \
             .genie_grouping('test_group_repr_2')
 
-        assert_equals(
+        assert (
            '.'.join([
                 'GenieJob()',
                 'genie_grouping("test_group_repr_2")',
                 'genie_username("group_repr")',
                 'job_id("1234")',
-            ]),
-            str(job)
-        )
+            ]) ==
+            str(job))
 
     def test_setting_grouping(self):
         """Test setting job Genie grouping."""
@@ -468,10 +450,9 @@ class TestingGrouping(unittest.TestCase):
             .genie_grouping('test_group') \
             .genie_grouping('test_group_1')
 
-        assert_equals(
-            'test_group_1',
-            job._genie_grouping
-        )
+        assert (
+            'test_group_1' ==
+            job._genie_grouping)
 
     def test_grouping_payload_genie3(self):
         """Test job Genie grouping payload (Genie 3)."""
@@ -480,10 +461,9 @@ class TestingGrouping(unittest.TestCase):
             .command_arguments('test') \
             .genie_grouping('test_grouping_payload') \
 
-        assert_equals(
-            'test_grouping_payload',
-            pygenie.adapter.genie_3.get_payload(job)['grouping']
-        )
+        assert (
+            'test_grouping_payload' ==
+            pygenie.adapter.genie_3.get_payload(job)['grouping'])
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -499,15 +479,14 @@ class TestingGroupingInstance(unittest.TestCase):
             .genie_grouping_instance('test_group_instance_repr_1') \
             .genie_grouping_instance('test_group_instance_repr_2') \
 
-        assert_equals(
+        assert (
             '.'.join([
                 'GenieJob()',
                 'genie_grouping_instance("test_group_instance_repr_2")',
                 'genie_username("group_instance_repr")',
                 'job_id("1234")',
-            ]),
-            str(job)
-        )
+            ]) ==
+            str(job))
 
     def test_setting_grouping_instance(self):
         """Test setting job Genie grouping instance."""
@@ -516,10 +495,9 @@ class TestingGroupingInstance(unittest.TestCase):
             .genie_grouping_instance('test_group_1234') \
             .genie_grouping_instance('test_group_777')
 
-        assert_equals(
-            'test_group_777',
-            job._genie_grouping_instance
-        )
+        assert (
+            'test_group_777' ==
+            job._genie_grouping_instance)
 
     def test_grouping_instance_payload_genie3(self):
         """Test job Genie grouping instance payload (Genie 3)."""
@@ -528,10 +506,9 @@ class TestingGroupingInstance(unittest.TestCase):
             .command_arguments('test') \
             .genie_grouping_instance('test_grouping_instance_payload') \
 
-        assert_equals(
-            'test_grouping_instance_payload',
-            pygenie.adapter.genie_3.get_payload(job)['groupingInstance']
-        )
+        assert (
+            'test_grouping_instance_payload' ==
+            pygenie.adapter.genie_3.get_payload(job)['groupingInstance'])
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -549,7 +526,7 @@ class TestingMetadata(unittest.TestCase):
             .metadata(bar='buzz') \
             .metadata(hello='hi') \
 
-        assert_equals(
+        assert (
             '.'.join([
                 'GenieJob()',
                 'genie_username("test_metadata_repr")',
@@ -558,9 +535,8 @@ class TestingMetadata(unittest.TestCase):
                 'metadata(foo="fizz")',
                 'metadata(foo="foo")',
                 'metadata(hello="hi")'
-            ]),
-            str(job)
-        )
+            ]) ==
+            str(job))
 
     def test_setting_metadata(self):
         """Test setting job metadata."""
@@ -572,16 +548,15 @@ class TestingMetadata(unittest.TestCase):
             .metadata(key1='val1a') \
             .metadata(key4='val4', key5='val5')
 
-        assert_equals(
+        assert (
             {
                 'key1': 'val1a',
                 'key2': 'val2',
                 'key3': 'val3',
                 'key4': 'val4',
                 'key5': 'val5',
-            },
-            job._metadata
-        )
+            } ==
+            job._metadata)
 
     def test_metadata_payload_genie3(self):
         """Test job metadata payload (Genie 3)."""
@@ -590,10 +565,9 @@ class TestingMetadata(unittest.TestCase):
             .command_arguments('test') \
             .metadata(k1=1, k2=2)
 
-        assert_equals(
+        assert (
             {
                 'k1': 1,
                 'k2': 2,
-            },
-            pygenie.adapter.genie_3.get_payload(job)['metadata']
-        )
+            } ==
+            pygenie.adapter.genie_3.get_payload(job)['metadata'])

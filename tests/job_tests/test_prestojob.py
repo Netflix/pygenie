@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 import unittest
 
 from mock import patch
-from nose.tools import assert_equals, assert_raises
 
 import pygenie
-
-
-assert_equals.__self__.maxDiff = None
 
 
 def mock_to_attachment(att):
@@ -30,10 +27,9 @@ class TestingPrestoJob(unittest.TestCase):
 
         job = pygenie.jobs.PrestoJob()
 
-        assert_equals(
-            job.get('default_command_tags'),
-            [u'type:presto']
-        )
+        assert (
+            job.get('default_command_tags') ==
+            [u'type:presto'])
 
     def test_cmd_args_explicit(self):
         """Test PrestoJob explicit cmd args."""
@@ -43,10 +39,9 @@ class TestingPrestoJob(unittest.TestCase):
             .script('select * from something') \
             .option('source', 'tester')
 
-        assert_equals(
-            job.cmd_args,
-            u'explicitly stating command args'
-        )
+        assert (
+            job.cmd_args ==
+            u'explicitly stating command args')
 
     def test_cmd_args_constructed_script_code(self):
         """Test PrestoJob constructed cmd args for adhoc script."""
@@ -59,10 +54,9 @@ class TestingPrestoJob(unittest.TestCase):
             .session('s1', 'v1') \
             .session('s2', 'v2')
 
-        assert_equals(
-            job.cmd_args,
-            u'--session s1=v1 --session s2=v2 --debug --opt1 val1 --source tester -f script.presto'
-        )
+        assert (
+            job.cmd_args ==
+            u'--session s1=v1 --session s2=v2 --debug --opt1 val1 --source tester -f script.presto')
 
     @patch('pygenie.jobs.presto.is_file')
     def test_cmd_args_constructed_script_file(self, is_file):
@@ -78,10 +72,9 @@ class TestingPrestoJob(unittest.TestCase):
             .option('opt1', 'val1') \
             .option('source', 'tester')
 
-        assert_equals(
-            job.cmd_args,
-            u'--session s1=v1 --session s2=v2 --debug --opt1 val1 --source tester -f test.presto'
-        )
+        assert (
+            job.cmd_args ==
+            u'--session s1=v1 --session s2=v2 --debug --opt1 val1 --source tester -f test.presto')
 
     @patch('pygenie.jobs.presto.is_file')
     def test_cmd_args_post_cmd_args(self, is_file):
@@ -100,10 +93,9 @@ class TestingPrestoJob(unittest.TestCase):
             .post_cmd_args(['a', 'b', 'c']) \
             .post_cmd_args('d e f')
 
-        assert_equals(
-            '--session s1=v1 --session s2=v2 --debug --opt1 val1 --source tester -f test.presto a b c d e f',
-            job.cmd_args
-        )
+        assert (
+            '--session s1=v1 --session s2=v2 --debug --opt1 val1 --source tester -f test.presto a b c d e f' ==
+            job.cmd_args)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -116,15 +108,14 @@ class TestingPrestoJobRepr(unittest.TestCase):
             .job_id('prestojob_repr') \
             .genie_username('testuser')
 
-        assert_equals(
-            str(job),
+        assert (
+            str(job) ==
             '.'.join([
                 'PrestoJob()',
                 'dependencies([{"data": "blah", "name": "blah"}])',
                 'genie_username("testuser")',
                 'job_id("prestojob_repr")'
-                ])
-        )
+                ]))
 
     @patch('pygenie.jobs.core.is_file')
     def test_repr(self, is_file):
@@ -163,8 +154,8 @@ class TestingPrestoJobRepr(unittest.TestCase):
             .tags('prestotag1') \
             .tags('prestotag2')
 
-        assert_equals(
-            str(job),
+        assert (
+            str(job) ==
             '.'.join([
                 'PrestoJob()',
                 'applications("prestoapp1")',
@@ -194,8 +185,7 @@ class TestingPrestoJobRepr(unittest.TestCase):
                 'tags("headers")',
                 'tags("prestotag1")',
                 'tags("prestotag2")'
-            ])
-        )
+            ]))
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -236,8 +226,8 @@ class TestingPrestoJobAdapters(unittest.TestCase):
             .tags('prestotag1, prestotag2') \
             .job_version('0.0.1presto')
 
-        assert_equals(
-            pygenie.adapter.genie_2.get_payload(job),
+        assert (
+            pygenie.adapter.genie_2.get_payload(job) ==
             {
                 u'attachments': [
                     {u'name': u'prestofile1', u'data': u'file contents'},
@@ -261,8 +251,7 @@ class TestingPrestoJobAdapters(unittest.TestCase):
                 u'tags': [u'prestotag1', u'prestotag2'],
                 u'user': u'jpresto',
                 u'version': u'0.0.1presto'
-            }
-        )
+            })
 
     @patch('pygenie.adapter.genie_2.to_attachment')
     @patch('os.path.isfile')
@@ -291,8 +280,8 @@ class TestingPrestoJobAdapters(unittest.TestCase):
             .tags('prestotag1, prestotag2') \
             .job_version('0.0.1presto')
 
-        assert_equals(
-            pygenie.adapter.genie_2.get_payload(job),
+        assert (
+            pygenie.adapter.genie_2.get_payload(job) ==
             {
                 u'attachments': [
                     {u'name': u'prestofile1', u'data': u'file contents'},
@@ -316,8 +305,7 @@ class TestingPrestoJobAdapters(unittest.TestCase):
                 u'tags': [u'prestotag1', u'prestotag2'],
                 u'user': u'jpresto',
                 u'version': u'0.0.1presto'
-            }
-        )
+            })
 
     @patch('pygenie.adapter.genie_3.open')
     @patch('os.path.isfile')
@@ -344,8 +332,8 @@ class TestingPrestoJobAdapters(unittest.TestCase):
             .tags('prestotag1, prestotag2') \
             .job_version('0.0.1presto')
 
-        assert_equals(
-            pygenie.adapter.genie_3.get_payload(job),
+        assert (
+            pygenie.adapter.genie_3.get_payload(job) ==
             {
                 u'applications': [u'prestoapplicationid1'],
                 u'attachments': [
@@ -371,8 +359,7 @@ class TestingPrestoJobAdapters(unittest.TestCase):
                 u'timeout': 7,
                 u'user': u'jpresto',
                 u'version': u'0.0.1presto'
-            }
-        )
+            })
 
     @patch('pygenie.adapter.genie_3.open')
     @patch('os.path.isfile')
@@ -401,8 +388,8 @@ class TestingPrestoJobAdapters(unittest.TestCase):
             .tags('prestotag1, prestotag2') \
             .job_version('0.0.1presto')
 
-        assert_equals(
-            pygenie.adapter.genie_3.get_payload(job),
+        assert (
+            pygenie.adapter.genie_3.get_payload(job) ==
             {
                 u'applications': [u'prestoapplicationid1'],
                 u'attachments': [
@@ -428,8 +415,7 @@ class TestingPrestoJobAdapters(unittest.TestCase):
                 u'timeout': 7,
                 u'user': u'jpresto',
                 u'version': u'0.0.1presto'
-            }
-        )
+            })
 
     def test_unicode_script(self):
         """Test PrestoJob containing unicode script."""
@@ -437,7 +423,6 @@ class TestingPrestoJobAdapters(unittest.TestCase):
         job = pygenie.jobs.PrestoJob() \
             .script(u'SELECT \'Siła_wyższa_(serial_telewizyjny)\'') \
 
-        assert_equals(
-            job.cmd_args,
-            u'-f script.presto'
-        )
+        assert (
+            job.cmd_args ==
+            u'-f script.presto')

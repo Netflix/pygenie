@@ -1,19 +1,16 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import unittest
 
+import pytest
 from mock import call, patch
-from nose.tools import (assert_equals,
-                        assert_true,
-                        assert_raises)
 
-from pygenie.conf import GenieConf
+from pygenie.adapter.genie_3 import Genie3Adapter, get_payload
 from pygenie.adapter.genie_x import substitute
-from pygenie.adapter.genie_3 import (Genie3Adapter,
-                                     get_payload)
+from pygenie.conf import GenieConf
+from pygenie.exceptions import GenieHTTPError, GenieLogNotFoundError
 from pygenie.jobs import PrestoJob
-from pygenie.exceptions import (GenieHTTPError,
-                                GenieLogNotFoundError)
 
 from .utils import fake_response
 
@@ -25,38 +22,34 @@ class TestStringSubstitution(unittest.TestCase):
     def test_substitute(self):
         """Test script parameter substitution."""
 
-        assert_equals(
+        assert (
             substitute('hello $name, goodbye $last',
-                       dict(name='test1', last='bye1')),
-            'hello test1, goodbye bye1'
-        )
+                       dict(name='test1', last='bye1')) ==
+            'hello test1, goodbye bye1')
 
     def test_substitute_expansion(self):
         """Test script parameter substitution (expansion)."""
 
-        assert_equals(
+        assert (
             substitute('hello ${name}, goodbye ${last}',
-                       dict(name='test2', last='bye2')),
-            'hello test2, goodbye bye2'
-        )
+                       dict(name='test2', last='bye2')) ==
+            'hello test2, goodbye bye2')
 
     def test_substitute_missing(self):
         """Test script parameter substitution with missing parameters."""
 
-        assert_equals(
+        assert (
             substitute('hello $name, goodbye $last',
-                       dict(name='tester3')),
-            'hello tester3, goodbye $last'
-        )
+                       dict(name='tester3')) ==
+            'hello tester3, goodbye $last')
 
     def test_substitute_missing_expansion(self):
         """Test script parameter substitution with missing parameters (expansion)."""
 
-        assert_equals(
+        assert (
             substitute('hello ${name}, goodbye ${last}',
-                       dict(name='tester4')),
-            'hello tester4, goodbye ${last}'
-        )
+                       dict(name='tester4')) ==
+            'hello tester4, goodbye ${last}')
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -73,7 +66,7 @@ class TestGenie3JobSubmission(unittest.TestCase):
 
         adapter.submit_job(PrestoJob().script("select * from dual"))
 
-        assert_equals(1, request.call_count)
+        assert 1 == request.call_count
 
     @patch('requests.sessions.Session.request')
     def test_job_submit_409(self, request):
@@ -87,10 +80,10 @@ class TestGenie3JobSubmission(unittest.TestCase):
 
         adapter = Genie3Adapter()
 
-        with assert_raises(GenieHTTPError):
+        with pytest.raises(GenieHTTPError):
             adapter.submit_job(PrestoJob().script("select * from dual"))
 
-        assert_equals(1, request.call_count)
+        assert 1 == request.call_count
 
     @patch('requests.sessions.Session.request')
     def test_job_submit_various_responses(self, request):
@@ -116,7 +109,7 @@ class TestGenie3JobSubmission(unittest.TestCase):
                            attempts=15,
                            backoff=0)
 
-        assert_equals(6, request.call_count)
+        assert 6 == request.call_count
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -131,7 +124,7 @@ class TestGenie3Adapter(unittest.TestCase):
 
         adapter = Genie3Adapter()
 
-        with assert_raises(GenieLogNotFoundError):
+        with pytest.raises(GenieLogNotFoundError):
             adapter.get_stderr('job_id_dne')
 
     def test_set_job_name_with_script_has_params(self):
@@ -143,9 +136,7 @@ class TestGenie3Adapter(unittest.TestCase):
 
         payload = get_payload(job)
 
-        assert_true(
-            'test.PrestoJob.Query' in payload['name']
-        )
+        assert 'test.PrestoJob.Query' in payload['name']
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get')
     def test_get_info_for_rj_all(self, get):
@@ -156,7 +147,7 @@ class TestGenie3Adapter(unittest.TestCase):
         adapter = Genie3Adapter()
         adapter.get_info_for_rj('111-all')
 
-        assert_equals(
+        assert (
             [
                 call('111-all', timeout=30),
                 call('111-all', path='request', timeout=30),
@@ -165,9 +156,8 @@ class TestGenie3Adapter(unittest.TestCase):
                 call('111-all', path='command', timeout=30, if_not_found={}),
                 call('111-all', path='execution', timeout=30, if_not_found={}),
                 call('111-all', path='output', timeout=30, headers={'Accept': 'application/json'}, if_not_found={})
-            ],
-            get.call_args_list
-        )
+            ] ==
+            get.call_args_list)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get')
     def test_get_info_for_rj_all_timeout(self, get):
@@ -186,7 +176,7 @@ class TestGenie3Adapter(unittest.TestCase):
         adapter = Genie3Adapter()
         adapter.get_info_for_rj('111-all-timeout', timeout=1)
 
-        assert_equals(
+        assert (
             [
                 call('111-all-timeout', timeout=1),
                 call('111-all-timeout', path='request', timeout=1),
@@ -195,9 +185,8 @@ class TestGenie3Adapter(unittest.TestCase):
                 call('111-all-timeout', path='command', timeout=1, if_not_found={}),
                 call('111-all-timeout', path='execution', timeout=1, if_not_found={}),
                 call('111-all-timeout', path='output', timeout=1, headers={'Accept': 'application/json'}, if_not_found={})
-            ],
-            get.call_args_list
-        )
+            ] ==
+            get.call_args_list)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get')
     def test_get_info_for_rj_job(self, get):
@@ -208,12 +197,11 @@ class TestGenie3Adapter(unittest.TestCase):
         adapter = Genie3Adapter()
         adapter.get_info_for_rj('111-job', job=True)
 
-        assert_equals(
+        assert (
             [
                 call('111-job', timeout=30),
-            ],
-            get.call_args_list
-        )
+            ] ==
+            get.call_args_list)
 
     @patch('requests.sessions.Session.request')
     def test_get_404(self, request):
@@ -228,15 +216,13 @@ class TestGenie3Adapter(unittest.TestCase):
 
         adapter = Genie3Adapter()
 
-        assert_equals(
-            'DEFAULT',
-            Genie3Adapter() .get(job_id='job-get-404', path='output', if_not_found='DEFAULT')
-        )
+        assert (
+            'DEFAULT' ==
+            Genie3Adapter() .get(job_id='job-get-404', path='output', if_not_found='DEFAULT'))
 
-        assert_equals(
-            1,
-            request.call_count
-        )
+        assert (
+            1 ==
+            request.call_count)
 
     @patch('requests.sessions.Session.request')
     def test_get_500(self, request):
@@ -254,15 +240,13 @@ class TestGenie3Adapter(unittest.TestCase):
 
         adapter = Genie3Adapter()
 
-        assert_equals(
-            {},
-            Genie3Adapter().get(job_id='job-get-500', path='output', if_not_found={}, attempts=3, backoff=0)
-        )
+        assert (
+            {} ==
+            Genie3Adapter().get(job_id='job-get-500', path='output', if_not_found={}, attempts=3, backoff=0))
 
-        assert_equals(
-            3,
-            request.call_count
-        )
+        assert (
+            3 ==
+            request.call_count)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -285,7 +269,7 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
             conf = GenieConf()
             conf.genie.set('disable_adapter_timeout', value)
             adapter = Genie3Adapter(conf=conf)
-            assert_equals(True, adapter.disable_timeout)
+            assert True == adapter.disable_timeout
 
     @patch('pygenie.adapter.genie_x.GenieBaseAdapter.call')
     def test_get_log_disabled_timeout(self, genie_call):
@@ -293,7 +277,7 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
 
         self.adapter.get_log('job-1111', 'some.log', timeout=111)
 
-        assert_equals(True, 'timeout' not in genie_call.call_args[1])
+        assert True == ('timeout' not in genie_call.call_args[1])
 
     @patch('pygenie.adapter.genie_x.GenieBaseAdapter.call')
     def test_get_disabled_timeout(self, genie_call):
@@ -301,7 +285,7 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
 
         self.adapter.get('job-2222', timeout=222)
 
-        assert_equals(True, 'timeout' not in genie_call.call_args[1])
+        assert True == ('timeout' not in genie_call.call_args[1])
 
     @patch('pygenie.adapter.genie_x.GenieBaseAdapter.call')
     def test_get_info_for_rj_disabled_timeout(self, genie_call):
@@ -309,10 +293,9 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
 
         self.adapter.get_info_for_rj('job-3333', execution=True, timeout=333)
 
-        assert_equals(
-            False,
-            any([self.has_timeout_in_kwargs(kall[1]) for kall in genie_call.call_args_list])
-        )
+        assert (
+            False ==
+            any([self.has_timeout_in_kwargs(kall[1]) for kall in genie_call.call_args_list]))
 
     @patch('pygenie.adapter.genie_x.GenieBaseAdapter.call')
     def test_get_status_disabled_timeout(self, genie_call):
@@ -320,7 +303,7 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
 
         self.adapter.get_status('job-4444', timeout=1)
 
-        assert_equals(True, 'timeout' not in genie_call.call_args[1])
+        assert True == ('timeout' not in genie_call.call_args[1])
 
     @patch('pygenie.adapter.genie_x.GenieBaseAdapter.call')
     def test_submit_job_disabled_timeout(self, genie_call):
@@ -330,4 +313,4 @@ class TestGenie3AdapterDisableTimeout(unittest.TestCase):
 
         self.adapter.submit_job(job)
 
-        assert_equals(None, genie_call.call_args[1]['timeout'])
+        assert None == genie_call.call_args[1]['timeout']

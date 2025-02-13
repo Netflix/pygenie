@@ -2,16 +2,15 @@
 Netflix test for pygenie.client.py
 """
 
-import types
-import unittest
-
 import json
 import os
 import re
-import responses
+import types
+import unittest
 
+import responses
 from mock import patch
-from nose.tools import assert_equals
+
 from pygenie.client import Genie
 from pygenie.conf import GenieConf
 
@@ -98,7 +97,7 @@ class TestCommand(unittest.TestCase):
         responses.add(responses.POST, self.path, status=201,
                       adding_headers={'Location': location})
         new_command_name = self.genie.create_command(self.command)
-        assert_equals(new_command_name, self.command['id'])
+        assert new_command_name == self.command['id']
 
     @responses.activate
     def test_patch_command(self):
@@ -112,13 +111,13 @@ class TestCommand(unittest.TestCase):
         "Testing that get_commands returns all required keys"
         responses.add(responses.GET, self.path, body=json.dumps(self.command))
         command = self.genie.get_command(self.command['id'])
-        assert_equals(command, self.command)
+        assert command == self.command
 
     @responses.activate
     def test_get_command_returns_none(self):
         responses.add(responses.GET, self.path, status=404)
         cluster = self.genie.get_command('does_not_exist')
-        assert_equals(cluster, None)
+        assert cluster == None
 
     @responses.activate
     def test_get_command_with_params(self):
@@ -131,7 +130,7 @@ class TestCommand(unittest.TestCase):
         commands = [i for i in self.genie.get_commands(
             filters={'name': self.command['name']})]
         assert len(commands) == 1, "Didn't return the correct amount of commands"
-        assert_equals(commands[0], self.command)
+        assert commands[0] == self.command
 
     @responses.activate
     def test_update_command(self):
@@ -284,7 +283,7 @@ class TestApplication(unittest.TestCase):
         responses.add(responses.POST, self.path, status=201,
                       adding_headers={'Location': location})
         app_id = self.genie.create_application(self.application)
-        assert_equals(app_id, self.application['id'])
+        assert app_id == self.application['id']
 
     @responses.activate
     def test_delete_application(self):
@@ -322,34 +321,34 @@ class TestApplication(unittest.TestCase):
     def test_get_application(self):
         responses.add(responses.GET, self.path, body=json.dumps(self.application))
         app = self.genie.get_application(self.application['id'])
-        assert_equals(app, self.application)
+        assert app == self.application
 
     @responses.activate
     def test_get_application_returns_none(self):
         responses.add(responses.GET, self.path, status=404)
         cluster = self.genie.get_application('does_not_exist')
-        assert_equals(cluster, None)
+        assert cluster == None
 
     @responses.activate
     def test_get_configs_for_application(self):
         configs = ['conf1', 'conf2', 'conf3']
         responses.add(responses.GET, self.path, body=json.dumps(configs))
         new_configs = self.genie.get_configs_for_application(self.application['id'])
-        assert_equals(configs, new_configs)
+        assert configs == new_configs
 
     @responses.activate
     def test_get_dependencies_for_application(self):
         dependencies = ['dep1', 'dep2', 'dep3']
         responses.add(responses.GET, self.path, body=json.dumps(dependencies))
         new_dependencies = self.genie.get_dependencies_for_application(self.application['id'])
-        assert_equals(dependencies, new_dependencies)
+        assert dependencies == new_dependencies
 
     @responses.activate
     def test_get_tags_for_application(self):
         tags = ['test:true', 'region:us-east-1', 'tag:very-long-tag-name']
         responses.add(responses.GET, self.path, body=json.dumps(tags))
         new_tags = self.genie.get_tags_for_application(self.application['id'])
-        assert_equals(tags, new_tags)
+        assert tags == new_tags
 
     @responses.activate
     def test_update_application(self):
@@ -417,7 +416,7 @@ class TestApplication(unittest.TestCase):
         cmds = [{'id': 'test1'}, {'id':'test2', 'name':'test'}]
         responses.add(responses.GET, self.path, body=json.dumps(cmds))
         commands = self.genie.get_commands_for_application(self.application['id'])
-        assert_equals(cmds, commands)
+        assert cmds == commands
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -449,26 +448,26 @@ class TestCluster(unittest.TestCase):
     def test_get_cluster(self):
         responses.add(responses.GET, self.path, body=json.dumps(self.cluster))
         cluster = self.genie.get_cluster(self.cluster['id'])
-        assert_equals(cluster, self.cluster)
+        assert cluster == self.cluster
 
     @responses.activate
     def test_get_cluster_returns_none(self):
         responses.add(responses.GET, self.path, status=404)
         cluster = self.genie.get_cluster(self.cluster['id'])
-        assert_equals(cluster, None)
+        assert cluster == None
 
     @responses.activate
     def test_get_cluster_returns_none(self):
         responses.add(responses.GET, self.path, status=404)
         cluster = self.genie.get_cluster(self.cluster['id'])
-        assert_equals(cluster, None)
+        assert cluster == None
 
     @responses.activate
     def test_get_commands_for_cluster(self):
         cmds = [{'id': 'test1'}, {'id':'test2', 'name':'test'}]
         responses.add(responses.GET, self.path, body=json.dumps(cmds))
         commands = self.genie.get_commands_for_cluster(self.cluster['id'])
-        assert_equals(cmds, commands)
+        assert cmds == commands
 
     @responses.activate
     def test_get_tags_for_cluster(self):
@@ -503,7 +502,7 @@ class TestCluster(unittest.TestCase):
         responses.add(responses.POST, self.path, status=201,
                       adding_headers={'Location': location})
         cluster_id = self.genie.create_cluster(self.cluster)
-        assert_equals(cluster_id, self.cluster['id'])
+        assert cluster_id == self.cluster['id']
 
     @responses.activate
     def test_delete_all_clusters(self):
@@ -620,62 +619,62 @@ class TestJob(unittest.TestCase):
     def test_get_job(self):
         responses.add(responses.GET, self.path, body=json.dumps(self.job))
         job = self.genie.get_job(self.job['id'])
-        assert_equals(job, self.job)
+        assert job == self.job
 
     @responses.activate
     def test_get_job_returns_none(self):
         responses.add(responses.GET, self.path, status=404)
         cluster = self.genie.get_job('does_not_exist')
-        assert_equals(cluster, None)
+        assert cluster == None
 
     @responses.activate
     def test_get_job_applications(self):
         apps = ['app1', 'app2']
         responses.add(responses.GET, self.path, body=json.dumps(apps))
         new_apps = self.genie.get_job_applications(self.job['id'])
-        assert_equals(apps, new_apps)
+        assert apps == new_apps
 
     @responses.activate
     def test_get_job_cluster(self):
         cluster = {'id': 'test'}
         responses.add(responses.GET, self.path, body=json.dumps(cluster))
         new_cluster = self.genie.get_job_cluster(self.job['id'])
-        assert_equals(cluster, new_cluster)
+        assert cluster == new_cluster
 
     @responses.activate
     def test_get_job_command(self):
         command = {'id': 'test'}
         responses.add(responses.GET, self.path, body=json.dumps(command))
         new_command = self.genie.get_job_command(self.job['id'])
-        assert_equals(command, new_command)
+        assert command == new_command
 
     @responses.activate
     def test_get_job_execution(self):
         execution = {'id': 'test'}
         responses.add(responses.GET, self.path, body=json.dumps(execution))
         new_execution = self.genie.get_job_execution(self.job['id'])
-        assert_equals(execution, new_execution)
+        assert execution == new_execution
 
     @responses.activate
     def test_get_job_output(self):
         output = {'id': 'test'}
         responses.add(responses.GET, self.path, body=json.dumps(output))
         new_output = self.genie.get_job_output(self.job['id'])
-        assert_equals(output, new_output)
+        assert output == new_output
 
     @responses.activate
     def test_get_job_request(self):
         request = {'id': 'test'}
         responses.add(responses.GET, self.path, body=json.dumps(request))
         new_request = self.genie.get_job_request(self.job['id'])
-        assert_equals(request, new_request)
+        assert request == new_request
 
     @responses.activate
     def test_get_job_status(self):
         status = {'id': 'test'}
         responses.add(responses.GET, self.path, body=json.dumps(status))
         new_status = self.genie.get_job_status(self.job['id'])
-        assert_equals(status, new_status)
+        assert status == new_status
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})

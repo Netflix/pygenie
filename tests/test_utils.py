@@ -1,25 +1,18 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import unittest
-
-from mock import patch
-from nose.tools import (assert_raises,
-                        assert_equals)
-
-from pygenie.utils import (call,
-                           str_to_list)
-from pygenie.jobs.utils import (generate_job_id,
-                                reattach_job,
-                                is_file)
-
-from pygenie.exceptions import (GenieHTTPError,
-                                GenieJobNotFoundError)
-
-from .utils import (FakeRunningJob,
-                    fake_response)
-
-from requests.exceptions import Timeout, ConnectionError
 from socket import timeout
+
+import pytest
+from mock import patch
+from requests.exceptions import ConnectionError, Timeout
+
+from pygenie.exceptions import GenieHTTPError, GenieJobNotFoundError
+from pygenie.jobs.utils import generate_job_id, is_file, reattach_job
+from pygenie.utils import call, str_to_list
+
+from .utils import FakeRunningJob, fake_response
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -34,8 +27,8 @@ class TestCall(unittest.TestCase):
 
         resp = call('http://genie-202')
 
-        assert_equals(202, resp.status_code)
-        assert_equals(1, request.call_count)
+        assert 202 == resp.status_code
+        assert 1 == request.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_various_status_code_retries(self, sleep, request):
@@ -54,11 +47,11 @@ class TestCall(unittest.TestCase):
             fake_response({}, 504),
         ]
 
-        with assert_raises(GenieHTTPError):
+        with pytest.raises(GenieHTTPError):
             call('http://genie-non-200', attempts=10, backoff=0)
 
-        assert_equals(10, request.call_count)
-        assert_equals(9, sleep.call_count)
+        assert 10 == request.call_count
+        assert 9 == sleep.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_503_202(self, sleep, request):
@@ -82,9 +75,9 @@ class TestCall(unittest.TestCase):
 
         resp = call('http://genie-non-200-202', attempts=10, backoff=0)
 
-        assert_equals(202, resp.status_code)
-        assert_equals(7, request.call_count)
-        assert_equals(6, sleep.call_count)
+        assert 202 == resp.status_code
+        assert 7 == request.call_count
+        assert 6 == sleep.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_503_200(self, sleep, request):
@@ -108,9 +101,9 @@ class TestCall(unittest.TestCase):
 
         resp = call('http://genie-non-200-200', attempts=10, backoff=0)
 
-        assert_equals(200, resp.status_code)
-        assert_equals(7, request.call_count)
-        assert_equals(6, sleep.call_count)
+        assert 200 == resp.status_code
+        assert 7 == request.call_count
+        assert 6 == sleep.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_404_not_none(self, sleep, request):
@@ -118,11 +111,11 @@ class TestCall(unittest.TestCase):
 
         request.return_value = fake_response({}, 404)
 
-        with assert_raises(GenieHTTPError):
+        with pytest.raises(GenieHTTPError):
             call('http://genie-404-raise', attempts=1, backoff=0)
 
-        assert_equals(1, request.call_count)
-        assert_equals(0, sleep.call_count)
+        assert 1 == request.call_count
+        assert 0 == sleep.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_404_none(self, sleep, request):
@@ -132,9 +125,9 @@ class TestCall(unittest.TestCase):
 
         resp = call('http://genie-404-none', none_on_404=True, attempts=1, backoff=0)
 
-        assert_equals(None, resp)
-        assert_equals(1, request.call_count)
-        assert_equals(0, sleep.call_count)
+        assert None == resp
+        assert 1 == request.call_count
+        assert 0 == sleep.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_failure_code(self, sleep, request):
@@ -152,11 +145,11 @@ class TestCall(unittest.TestCase):
             fake_response({}, 500)
         ]
 
-        with assert_raises(GenieHTTPError):
+        with pytest.raises(GenieHTTPError):
             call('http://genie-failure-code', failure_codes=412, attempts=10, backoff=0)
 
-        assert_equals(4, request.call_count)
-        assert_equals(3, sleep.call_count)
+        assert 4 == request.call_count
+        assert 3 == sleep.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_failure_codes(self, sleep, request):
@@ -175,11 +168,11 @@ class TestCall(unittest.TestCase):
             fake_response({}, 500)
         ]
 
-        with assert_raises(GenieHTTPError):
+        with pytest.raises(GenieHTTPError):
             call('http://genie-failure-codes', failure_codes=[409, 412], attempts=10, backoff=0)
 
-        assert_equals(3, request.call_count)
-        assert_equals(2, sleep.call_count)
+        assert 3 == request.call_count
+        assert 2 == sleep.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_retry_timeout(self, sleep, request):
@@ -193,11 +186,11 @@ class TestCall(unittest.TestCase):
             ConnectionError,
         ]
 
-        with assert_raises(Timeout):
+        with pytest.raises(Timeout):
             call('http://genie-timeout', attempts=4, backoff=0)
 
-        assert_equals(4, request.call_count)
-        assert_equals(3, sleep.call_count)
+        assert 4 == request.call_count
+        assert 3 == sleep.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_retry_timeout_202(self, sleep, request):
@@ -213,8 +206,8 @@ class TestCall(unittest.TestCase):
 
         call('http://genie-timeout-202', attempts=5, backoff=0)
 
-        assert_equals(3, request.call_count)
-        assert_equals(2, sleep.call_count)
+        assert 3 == request.call_count
+        assert 2 == sleep.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_retry_timeout_404(self, sleep, request):
@@ -233,11 +226,11 @@ class TestCall(unittest.TestCase):
             timeout
         ]
 
-        with assert_raises(GenieHTTPError):
+        with pytest.raises(GenieHTTPError):
             call('http://genie-timeout-404', failure_codes=404, attempts=7, backoff=0)
 
-        assert_equals(4, request.call_count)
-        assert_equals(3, sleep.call_count)
+        assert 4 == request.call_count
+        assert 3 == sleep.call_count
 
     @patch('pygenie.utils.time.sleep')
     def test_retry_timeout_404_return_none(self, sleep, request):
@@ -259,9 +252,9 @@ class TestCall(unittest.TestCase):
                     failure_codes=404,
                     none_on_404=True)
 
-        assert_equals(4, request.call_count)
-        assert_equals(3, sleep.call_count)
-        assert_equals(None, resp)
+        assert 4 == request.call_count
+        assert 3 == sleep.call_count
+        assert None == resp
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -271,26 +264,23 @@ class TestStringToList(unittest.TestCase):
     def test_string_to_list_string(self):
         """Test string to list with default delimiter (comma)."""
 
-        assert_equals(
-            str_to_list('a, b, c'),
-            ['a', 'b', 'c']
-        )
+        assert (
+            str_to_list('a, b, c') ==
+            ['a', 'b', 'c'])
 
     def test_string_to_list_string_delimiter(self):
         """Test string to list with specified delimiter."""
 
-        assert_equals(
-            str_to_list(' a | b | c ', delimiter='|'),
-            ['a', 'b', 'c']
-        )
+        assert (
+            str_to_list(' a | b | c ', delimiter='|') ==
+            ['a', 'b', 'c'])
 
     def test_string_to_list_none(self):
         """Test string to list with input arg None."""
 
-        assert_equals(
-            str_to_list(None),
-            None
-        )
+        assert (
+            str_to_list(None) ==
+            None)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -313,7 +303,7 @@ class TestReattachJob(unittest.TestCase):
 
         get_status.side_effect = GenieJobNotFoundError
 
-        with assert_raises(GenieJobNotFoundError) as cm:
+        with pytest.raises(GenieJobNotFoundError) as cm:
             running_job = reattach_job('test-reattach-job-dne')
 
 
@@ -331,7 +321,7 @@ class TestGeneratingJobId(unittest.TestCase):
             GenieJobNotFoundError
         ]
 
-        assert_equals(job_id, generate_job_id(job_id))
+        assert job_id == generate_job_id(job_id)
 
     @patch('pygenie.jobs.utils.reattach_job')
     def test_gen_job_id_return_success_true_running(self, mock_reattach_job):
@@ -348,7 +338,7 @@ class TestGeneratingJobId(unittest.TestCase):
             GenieJobNotFoundError
         ]
 
-        assert_equals(job_id+'-3', generate_job_id(job_id))
+        assert job_id+'-3' == generate_job_id(job_id)
 
     @patch('pygenie.jobs.utils.reattach_job')
     def test_gen_job_id_return_success_true(self, mock_reattach_job):
@@ -365,7 +355,7 @@ class TestGeneratingJobId(unittest.TestCase):
             GenieJobNotFoundError
         ]
 
-        assert_equals(job_id+'-2', generate_job_id(job_id))
+        assert job_id+'-2' == generate_job_id(job_id)
 
     @patch('pygenie.jobs.utils.reattach_job')
     def test_gen_job_id_with_return_success_false(self, mock_reattach_job):
@@ -383,7 +373,7 @@ class TestGeneratingJobId(unittest.TestCase):
             GenieJobNotFoundError
         ]
 
-        assert_equals(job_id+'-6', generate_job_id(job_id, return_success=False))
+        assert job_id+'-6' == generate_job_id(job_id, return_success=False)
 
     @patch('pygenie.jobs.utils.reattach_job')
     def test_gen_job_id_with_return_success_false_with_running(self, mock_reattach_job):
@@ -401,13 +391,13 @@ class TestGeneratingJobId(unittest.TestCase):
             GenieJobNotFoundError
         ]
 
-        assert_equals(job_id+'-4', generate_job_id(job_id, return_success=False))
+        assert job_id+'-4' == generate_job_id(job_id, return_success=False)
 
     def test_is_file_for_valid_s3path(self):
         path = 's3://root/myfile'
-        assert_equals(is_file(path), True)
+        assert is_file(path) == True
 
     def test_is_file_for_s3path_with_null_bytes(self):
         # simulate https://github.com/python/cpython/pull/7695
         path = 's3://root/myfile\x00'
-        assert_equals(is_file(path), False)
+        assert is_file(path) == False

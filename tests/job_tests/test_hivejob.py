@@ -1,14 +1,10 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 import unittest
 
 from mock import patch
-from nose.tools import assert_equals, assert_raises
-
-
-assert_equals.__self__.maxDiff = None
-
 
 import pygenie
 
@@ -29,10 +25,9 @@ class TestingHiveJob(unittest.TestCase):
 
         job = pygenie.jobs.HiveJob()
 
-        assert_equals(
-            job.get('default_command_tags'),
-            [u'type:hive']
-        )
+        assert (
+            job.get('default_command_tags') ==
+            [u'type:hive'])
 
     def test_cmd_args_explicit(self):
         """Test HiveJob explicit cmd args."""
@@ -43,10 +38,9 @@ class TestingHiveJob(unittest.TestCase):
             .property('source', 'tester') \
             .property_file('properties.hive')
 
-        assert_equals(
-            job.cmd_args,
-            u'explicitly stating command args'
-        )
+        assert (
+            job.cmd_args ==
+            u'explicitly stating command args')
 
     def test_cmd_args_constructed_script_code(self):
         """Test HiveJob constructed cmd args for adhoc script."""
@@ -61,15 +55,14 @@ class TestingHiveJob(unittest.TestCase):
             .property_file('properties_1.hive') \
             .property_file('properties_2.hive')
 
-        assert_equals(
-            job.cmd_args,
+        assert (
+            job.cmd_args ==
             " ".join([
                 "-i properties_1.hive -i properties_2.hive",
                 "--hiveconf hconf1=h1 --hiveconf prop1=p1 --hiveconf prop2=p2",
                 "-i _hive_parameters.txt",
                 "-f script.hive"
-            ])
-        )
+            ]))
 
     @patch('pygenie.jobs.hive.is_file')
     def test_cmd_args_constructed_script_file(self, is_file):
@@ -86,15 +79,14 @@ class TestingHiveJob(unittest.TestCase):
             .property_file('props_1.hive') \
             .property_file('props_2.hive')
 
-        assert_equals(
+        assert (
             " ".join([
                 "-i props_1.hive -i props_2.hive",
                 "--hiveconf p1=v1 --hiveconf p2=v2",
                 "-i _hive_parameters.txt",
                 "-f test.hql"
-            ]),
-            job.cmd_args
-        )
+            ]) ==
+            job.cmd_args)
 
     @patch('pygenie.jobs.hive.is_file')
     def test_cmd_args_post_cmd_args(self, is_file):
@@ -112,15 +104,14 @@ class TestingHiveJob(unittest.TestCase):
             .post_cmd_args(['a', 'b', 'c']) \
             .post_cmd_args('d e f')
 
-        assert_equals(
+        assert (
             " ".join([
                 "--hiveconf p1=v1 --hiveconf p2=v2",
                 "-i _hive_parameters.txt",
                 "-f test.hql",
                 "a b c d e f"
-            ]),
-            job.cmd_args
-        )
+            ]) ==
+            job.cmd_args)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -137,16 +128,15 @@ class TestingHiveJobParameters(unittest.TestCase):
             .parameter("unicode", "\xf3\xf3\xf3") \
             .parameter("number", 8)
 
-        assert_equals(
+        assert (
             '\n'.join([
                 "SET hivevar:spaces=this has spaces;",
                 "SET hivevar:single_quotes=test' test';",
                 "SET hivevar:escaped_single_quotes=Barney\\\'s Adventure;",
                 "SET hivevar:unicode=\xf3\xf3\xf3;",
                 "SET hivevar:number=8;"
-            ]),
-            job._parameter_file
-        )
+            ]) ==
+            job._parameter_file)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -193,7 +183,7 @@ class TestingHiveJobRepr(unittest.TestCase):
             .property_file('/hive/conf2.prop') \
             .script("SELECT * FROM TEST") \
 
-        assert_equals(
+        assert (
             '.'.join([
                 'HiveJob()',
                 'applications("hive.app.1")',
@@ -225,9 +215,8 @@ class TestingHiveJobRepr(unittest.TestCase):
                 'script("SELECT * FROM TEST")',
                 'tags("hive.tag.1")',
                 'tags("hive.tag.2")'
-            ]),
-            str(job)
-        )
+            ]) ==
+            str(job))
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -270,8 +259,8 @@ class TestingHiveJobAdapters(unittest.TestCase):
             .tags('hive.tag1, hive.tag2') \
             .script('SELECT * FROM DUAL')
 
-        assert_equals(
-            pygenie.adapter.genie_2.get_payload(job),
+        assert (
+            pygenie.adapter.genie_2.get_payload(job) ==
             {
                 u'attachments': [
                     {u'name': u'hive.file1', u'data': u'file contents'},
@@ -296,8 +285,7 @@ class TestingHiveJobAdapters(unittest.TestCase):
                 u'tags': [u'hive.tag1', u'hive.tag2'],
                 u'user': u'jhive',
                 u'version': u'0.0.hive'
-            }
-        )
+            })
 
     @patch('pygenie.adapter.genie_2.to_attachment')
     @patch('os.path.isfile')
@@ -329,8 +317,8 @@ class TestingHiveJobAdapters(unittest.TestCase):
             .tags('hive.tag1, hive.tag2') \
             .script('/hive/script.hql')
 
-        assert_equals(
-            pygenie.adapter.genie_2.get_payload(job),
+        assert (
+            pygenie.adapter.genie_2.get_payload(job) ==
             {
                 u'attachments': [
                     {u'name': u'hive.file1', u'data': u'file contents'},
@@ -356,8 +344,7 @@ class TestingHiveJobAdapters(unittest.TestCase):
                 u'tags': [u'hive.tag1', u'hive.tag2'],
                 u'user': u'hive',
                 u'version': u'0.0.hive-alpha'
-            }
-        )
+            })
 
     @patch('pygenie.adapter.genie_3.open')
     @patch('os.path.isfile')
@@ -391,7 +378,7 @@ class TestingHiveJobAdapters(unittest.TestCase):
             .property_file('/properties_local.conf') \
             .script('SELECT * FROM DUAL')
 
-        assert_equals(
+        assert (
             {
                 'applications': ['hive.app'],
                 'attachments': [
@@ -419,9 +406,8 @@ class TestingHiveJobAdapters(unittest.TestCase):
                 'timeout': 9,
                 'user': 'hive',
                 'version': '0.0.-0'
-            },
-            pygenie.adapter.genie_3.get_payload(job)
-        )
+            } ==
+            pygenie.adapter.genie_3.get_payload(job))
 
     @patch('pygenie.adapter.genie_3.open')
     @patch('os.path.isfile')
@@ -457,7 +443,7 @@ class TestingHiveJobAdapters(unittest.TestCase):
             .property_file('/properties2.conf') \
             .script('/script.hql')
 
-        assert_equals(
+        assert (
             {
                 'applications': ['hive.app'],
                 'attachments': [
@@ -486,6 +472,5 @@ class TestingHiveJobAdapters(unittest.TestCase):
                 'timeout': 9,
                 'user': 'hive',
                 'version': '0.0.-0'
-            },
-            pygenie.adapter.genie_3.get_payload(job)
-        )
+            } ==
+            pygenie.adapter.genie_3.get_payload(job))

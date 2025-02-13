@@ -1,21 +1,15 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 import pkgutil
-import requests
 import unittest
 
 from mock import patch
-from nose.tools import assert_equals
 
 from .utils import fake_response
 
-
-assert_equals.__self__.maxDiff = None
-
-
 DIRNAME = os.path.dirname(os.path.realpath(__file__))
-
 
 import pygenie
 
@@ -23,8 +17,8 @@ import pygenie
 def check_request_auth_kwargs(*args, **kwargs):
     auth = kwargs.get('auth')
     assert auth is not None
-    assert_equals(auth.username, u'auth_user')
-    assert_equals(auth.password, u'1234!!!')
+    assert auth.username == u'auth_user'
+    assert auth.password == u'1234!!!'
     return fake_response('content')
 
 
@@ -41,10 +35,9 @@ class TestingAuthHandler(unittest.TestCase):
         """Test initializing auth object specified in configuration."""
 
         auth_handler = pygenie.auth.AuthHandler(conf=self.conf)
-        assert_equals(
-            isinstance(auth_handler.auth, pygenie.auth.HTTPBasicGenieAuth),
-            True
-        )
+        assert (
+            isinstance(auth_handler.auth, pygenie.auth.HTTPBasicGenieAuth) ==
+            True)
 
     @patch('requests.Session.request')
     def test_request_call(self, request):

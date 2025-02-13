@@ -1,15 +1,12 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 import unittest
 
 from mock import patch
-from nose.tools import assert_equals, assert_raises
 
 import pygenie
-
-
-assert_equals.__self__.maxDiff = None
 
 
 def mock_to_attachment(att):
@@ -28,10 +25,9 @@ class TestingSqoopJob(unittest.TestCase):
 
         job = pygenie.jobs.SqoopJob()
 
-        assert_equals(
-            job.get('default_command_tags'),
-            [u'type:sqoop']
-        )
+        assert (
+            job.get('default_command_tags') ==
+            [u'type:sqoop'])
 
     def test_cmd_args_explicit(self):
         """Test SqoopJob explicit cmd args."""
@@ -41,10 +37,9 @@ class TestingSqoopJob(unittest.TestCase):
             .cmd('cmd_test') \
             .option('should_not', 'be_used')
 
-        assert_equals(
-            job.cmd_args,
-            u'sqoop job explicitly stating command args'
-        )
+        assert (
+            job.cmd_args ==
+            u'sqoop job explicitly stating command args')
 
     def test_cmd_args_constructed_script_code(self):
         """Test SqoopJob constructed cmd args for adhoc script."""
@@ -63,14 +58,13 @@ class TestingSqoopJob(unittest.TestCase):
             .table('mytable') \
             .target_dir('/path/to/output')
 
-        assert_equals(
-            job.cmd_args,
+        assert (
+            job.cmd_args ==
             ' '.join([
                 'export',
                 '-Dprop1=value1',
                 '--options-file _sqoop_options.txt'
-            ])
-        )
+            ]))
 
     def test_cmd_args_post_cmd_args(self):
         """Test SqoopJob constructed cmd args with post cmd args."""
@@ -92,15 +86,14 @@ class TestingSqoopJob(unittest.TestCase):
             .post_cmd_args(['a', 'b', 'c']) \
             .post_cmd_args('d e f')
 
-        assert_equals(
+        assert (
             ' '.join([
                 'export',
                 '-Dprop1=value1',
                 '--options-file _sqoop_options.txt',
                 'a b c d e f'
-            ]),
-            job.cmd_args
-        )
+            ]) ==
+            job.cmd_args)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -126,8 +119,8 @@ class TestingSqoopJobRepr(unittest.TestCase):
             .table('test_table') \
             .target_dir('/path/to/test/output')
 
-        assert_equals(
-            str(job),
+        assert (
+            str(job) ==
             '.'.join([
                 'SqoopJob()',
                 'cmd("importtest")',
@@ -145,8 +138,7 @@ class TestingSqoopJobRepr(unittest.TestCase):
                 'option("verbose", None)',
                 'property("p1", "v1", "-D")',
                 'property("p2", "v2", "-f")'
-            ])
-        )
+            ]))
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -169,7 +161,7 @@ class TestingSqoopOptionsFile(unittest.TestCase):
             .option('verbose') \
             .option('direct')
 
-        assert_equals(
+        assert (
             "\n".join([
                 "--connect",
                 "'jdbc:oracle@ZZZZZ'",
@@ -191,9 +183,8 @@ class TestingSqoopOptionsFile(unittest.TestCase):
                 "''",
                 "--verbose",
                 "--direct",
-            ]) + "\n",
-            job._options_file
-        )
+            ]) + "\n" ==
+            job._options_file)
 
     def test_newlines(self):
         """Test SqoopJob options file construction with new lines"""
@@ -211,10 +202,9 @@ WHERE
         job = pygenie.jobs.SqoopJob() \
             .option('query', query)
 
-        assert_equals(
-            u"--query\n' SELECT     col1,     col2, FROM     table WHERE     col1 > 0 '\n",
-            job._options_file
-        )
+        assert (
+            u"--query\n' SELECT     col1,     col2, FROM     table WHERE     col1 > 0 '\n" ==
+            job._options_file)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -262,8 +252,8 @@ class TestingSqoopJobAdapters(unittest.TestCase):
             .property('prop1', 'pval1') \
             .connect('jdbc://test')
 
-        assert_equals(
-            pygenie.adapter.genie_2.get_payload(job),
+        assert (
+            pygenie.adapter.genie_2.get_payload(job) ==
             {
                 u'attachments': [
                     {u'name': u'sqoopfile1', u'data': u'file contents'},
@@ -290,8 +280,7 @@ class TestingSqoopJobAdapters(unittest.TestCase):
                 u'tags': [u'sqooptag1', u'sqooptag2'],
                 u'user': u'jsqoop-genie',
                 u'version': u'0.0.1sqoop'
-            }
-        )
+            })
 
     @patch('pygenie.adapter.genie_3.open')
     @patch('os.path.isfile')
@@ -325,8 +314,8 @@ class TestingSqoopJobAdapters(unittest.TestCase):
             .property('prop1-g3', 'pval1-g3') \
             .connect('jdbc://test-g3')
 
-        assert_equals(
-            pygenie.adapter.genie_3.get_payload(job),
+        assert (
+            pygenie.adapter.genie_3.get_payload(job) ==
             {
                 u'applications': [u'sqoop-app-id1'],
                 u'attachments': [
@@ -352,5 +341,4 @@ class TestingSqoopJobAdapters(unittest.TestCase):
                 u'timeout': 5,
                 u'user': u'jsqoop-genie3',
                 u'version': u'0.0.1sqoop-g3'
-            }
-        )
+            })

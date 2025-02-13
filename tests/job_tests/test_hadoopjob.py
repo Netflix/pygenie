@@ -1,15 +1,11 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 import unittest
 
 from mock import patch
-from nose.tools import assert_equals
 from six import text_type
-
-
-assert_equals.__self__.maxDiff = None
-
 
 import pygenie
 
@@ -30,10 +26,9 @@ class TestingHadoopJob(unittest.TestCase):
 
         job = pygenie.jobs.HadoopJob()
 
-        assert_equals(
-            job.get('default_command_tags'),
-            [u'type:hadoop']
-        )
+        assert (
+            job.get('default_command_tags') ==
+            [u'type:hadoop'])
 
     def test_cmd_args_explicit(self):
         """Test HadoopJob explicit cmd args."""
@@ -43,10 +38,9 @@ class TestingHadoopJob(unittest.TestCase):
             .script("""this should not be taken""") \
             .post_cmd_args('should not be used')
 
-        assert_equals(
-            job.cmd_args,
-            'explicitly stating command args'
-        )
+        assert (
+            job.cmd_args ==
+            'explicitly stating command args')
 
     def test_cmd_args_constructed_script_code(self):
         """Test HadoopJob constructed cmd args for adhoc script."""
@@ -57,10 +51,9 @@ class TestingHadoopJob(unittest.TestCase):
             .property('prop2', 'v2') \
             .property_file('/Users/hadoop/props.conf')
 
-        assert_equals(
-            'fs -conf props.conf -Dprop1=v1 -Dprop2=v2 -ls /test',
-            job.cmd_args
-        )
+        assert (
+            'fs -conf props.conf -Dprop1=v1 -Dprop2=v2 -ls /test' ==
+            job.cmd_args)
 
     def test_cmd_args_post_cmd_args(self):
         """Test HadoopJob constructed cmd args with post cmd args."""
@@ -74,10 +67,9 @@ class TestingHadoopJob(unittest.TestCase):
             .post_cmd_args(['a', 'b', 'c']) \
             .post_cmd_args('d e f')
 
-        assert_equals(
-            'fs -conf props.conf -Dprop1=v1 -Dprop2=v2 -ls /test a b c d e f',
-            job.cmd_args
-        )
+        assert (
+            'fs -conf props.conf -Dprop1=v1 -Dprop2=v2 -ls /test a b c d e f' ==
+            job.cmd_args)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -118,8 +110,8 @@ class TestingHadoopJobRepr(unittest.TestCase):
             .property_file('/Users/hadoop/test.conf') \
             .script('jar testing.jar')
 
-        assert_equals(
-            str(job),
+        assert (
+            str(job) ==
             '.'.join([
                 'HadoopJob()',
                 'applications("hadoop_app_1")',
@@ -146,8 +138,7 @@ class TestingHadoopJobRepr(unittest.TestCase):
                 'script("jar testing.jar")',
                 'tags("hadoop_tag_1")',
                 'tags("hadoop_tag_2")'
-            ])
-        )
+            ]))
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -189,8 +180,8 @@ class TestingHadoopJobAdapters(unittest.TestCase):
             .tags('hadooptag') \
             .job_version('0.0.hadoop-alpha')
 
-        assert_equals(
-            pygenie.adapter.genie_2.get_payload(job),
+        assert (
+            pygenie.adapter.genie_2.get_payload(job) ==
             {
                 'attachments': [
                     {'name': 'hadoopfile1', 'data': 'file contents'}
@@ -212,8 +203,7 @@ class TestingHadoopJobAdapters(unittest.TestCase):
                 'tags': ['hadooptag'],
                 'user': 'jhadoop',
                 'version': '0.0.hadoop-alpha'
-            }
-        )
+            })
 
     @patch('pygenie.adapter.genie_3.open')
     @patch('os.path.isfile')
@@ -242,8 +232,8 @@ class TestingHadoopJobAdapters(unittest.TestCase):
             .tags('hadoop.tag') \
             .job_version('0.0.hadoop')
 
-        assert_equals(
-            pygenie.adapter.genie_3.get_payload(job),
+        assert (
+            pygenie.adapter.genie_3.get_payload(job) ==
             {
                 u'applications': [u'hadoop.app1'],
                 u'attachments': [
@@ -267,5 +257,4 @@ class TestingHadoopJobAdapters(unittest.TestCase):
                 u'timeout': 7,
                 u'user': u'jhadoop',
                 u'version': u'0.0.hadoop'
-            }
-        )
+            })

@@ -1,15 +1,11 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import unittest
 
 from mock import call, patch
-from nose.tools import assert_equals, assert_raises
 
 import pygenie
-
-from ..utils import fake_response
-
-assert_equals.__self__.maxDiff = None
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -25,10 +21,9 @@ class TestingRunningJobIsDone(unittest.TestCase):
         running_job = pygenie.jobs.RunningJob('1234-init',
                                               info={'status': 'INIT'})
 
-        assert_equals(
-            running_job.is_done,
-            False
-        )
+        assert (
+            running_job.is_done ==
+            False)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     def test_running_status(self, get_status):
@@ -39,10 +34,9 @@ class TestingRunningJobIsDone(unittest.TestCase):
         running_job = pygenie.jobs.RunningJob('1234-running',
                                               info={'status': 'RUNNING'})
 
-        assert_equals(
-            running_job.is_done,
-            False
-        )
+        assert (
+            running_job.is_done ==
+            False)
 
     def test_killed_status(self):
         """Test RunningJob().is_done with 'KILLED' status."""
@@ -50,10 +44,9 @@ class TestingRunningJobIsDone(unittest.TestCase):
         running_job = pygenie.jobs.RunningJob('1234-killed',
                                               info={'status': 'KILLED'})
 
-        assert_equals(
-            running_job.is_done,
-            True
-        )
+        assert (
+            running_job.is_done ==
+            True)
 
     def test_succeeded_status(self):
         """Test RunningJob().is_done with 'SUCCEEDED' status."""
@@ -61,10 +54,9 @@ class TestingRunningJobIsDone(unittest.TestCase):
         running_job = pygenie.jobs.RunningJob('1234-succeeded',
                                               info={'status': 'SUCCEEDED'})
 
-        assert_equals(
-            running_job.is_done,
-            True
-        )
+        assert (
+            running_job.is_done ==
+            True)
 
     def test_failed_status(self):
         """Test RunningJob().is_done with 'FAILED' status."""
@@ -72,10 +64,9 @@ class TestingRunningJobIsDone(unittest.TestCase):
         running_job = pygenie.jobs.RunningJob('1234-failed',
                                               info={'status': 'FAILED'})
 
-        assert_equals(
-            running_job.is_done,
-            True
-        )
+        assert (
+            running_job.is_done ==
+            True)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -110,10 +101,9 @@ class TestingRunningJobUpdate(unittest.TestCase):
         running_job = pygenie.jobs.RunningJob('1234-update')
         running_job.update()
 
-        assert_equals(
-            get_info.call_args_list,
-            [call(u'1234-update')]
-        )
+        assert (
+            get_info.call_args_list ==
+            [call(u'1234-update')])
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get')
     def test_update_timeout(self, get):
@@ -124,7 +114,7 @@ class TestingRunningJobUpdate(unittest.TestCase):
         running_job = pygenie.jobs.RunningJob('1234-update-timeout')
         running_job.update(timeout=3)
 
-        assert_equals(
+        assert (
             [
                 call('1234-update-timeout', timeout=3),
                 call('1234-update-timeout', path='request', timeout=3),
@@ -133,9 +123,8 @@ class TestingRunningJobUpdate(unittest.TestCase):
                 call('1234-update-timeout', if_not_found={}, path='command', timeout=3),
                 call('1234-update-timeout', if_not_found={}, path='execution', timeout=3),
                 call('1234-update-timeout', if_not_found={}, path='output', timeout=3, headers={u'Accept': u'application/json'})
-            ],
-            get.call_args_list
-        )
+            ] ==
+            get.call_args_list)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get')
     def test_update_section(self, get):
@@ -146,10 +135,9 @@ class TestingRunningJobUpdate(unittest.TestCase):
         running_job = pygenie.jobs.RunningJob('1234-update-section')
         running_job.update(info_section='job')
 
-        assert_equals(
-            [call(u'1234-update-section', timeout=30)],
-            get.call_args_list
-        )
+        assert (
+            [call(u'1234-update-section', timeout=30)] ==
+            get.call_args_list)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get')
     def test_update_section_timeout(self, get):
@@ -158,10 +146,9 @@ class TestingRunningJobUpdate(unittest.TestCase):
         running_job = pygenie.jobs.RunningJob('1234-update-section-timeout')
         running_job.update(info_section='request', timeout=1)
 
-        assert_equals(
-            [call('1234-update-section-timeout', path='request', timeout=1)],
-            get.call_args_list
-        )
+        assert (
+            [call('1234-update-section-timeout', path='request', timeout=1)] ==
+            get.call_args_list)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -187,10 +174,9 @@ class TestingRunningJobProperties(unittest.TestCase):
 
         get_info.assert_called_once_with(u'rj-cluster_name', cluster=True)
 
-        assert_equals(
-            [cluster_name, cluster_name],
-            values
-        )
+        assert (
+            [cluster_name, cluster_name] ==
+            values)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
@@ -211,10 +197,9 @@ class TestingRunningJobProperties(unittest.TestCase):
 
         get_info.assert_called_once_with(u'rj-command_args', job=True)
 
-        assert_equals(
-            [value, value],
-            values
-        )
+        assert (
+            [value, value] ==
+            values)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
@@ -237,14 +222,13 @@ class TestingRunningJobProperties(unittest.TestCase):
 
         get_info.assert_called_once_with('rj-cpu', request=True)
 
-        assert_equals(
+        assert (
             [
                 value,
                 value,
                 value
-            ],
-            values
-        )
+            ] ==
+            values)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
@@ -265,10 +249,9 @@ class TestingRunningJobProperties(unittest.TestCase):
 
         get_info.assert_called_once_with(u'rj-description', job=True)
 
-        assert_equals(
-            [value, value],
-            values
-        )
+        assert (
+            [value, value] ==
+            values)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
@@ -291,14 +274,13 @@ class TestingRunningJobProperties(unittest.TestCase):
 
         get_info.assert_called_once_with('rj-memory', request=True)
 
-        assert_equals(
+        assert (
             [
                 value,
                 value,
                 value
-            ],
-            values
-        )
+            ] ==
+            values)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
@@ -319,10 +301,9 @@ class TestingRunningJobProperties(unittest.TestCase):
 
         get_info.assert_called_once_with(u'rj-request_data', request=True)
 
-        assert_equals(
-            [value, value],
-            values
-        )
+        assert (
+            [value, value] ==
+            values)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
     def test_get_runningjob_command_data(self, get_info):
@@ -335,10 +316,9 @@ class TestingRunningJobProperties(unittest.TestCase):
 
         get_info.assert_called_once_with(u'rj-command_data', command=True)
 
-        assert_equals(
-            expected,
-            actual
-        )
+        assert (
+            expected ==
+            actual)
 
     @patch('pygenie.jobs.running.RunningJob.update')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
@@ -355,22 +335,20 @@ class TestingRunningJobProperties(unittest.TestCase):
             running_job.status
         ]
 
-        assert_equals(
-            get_status.call_args_list,
+        assert (
+            get_status.call_args_list ==
             [
                 call(u'rj-status'),
                 call(u'rj-status')
-            ]
-        )
+            ])
 
-        assert_equals(
+        assert (
             [
                 'RUNNING',
                 'SUCCEEDED',
                 'SUCCEEDED'
-            ],
-            values
-        )
+            ] ==
+            values)
 
     @patch('pygenie.jobs.running.RunningJob.update')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
@@ -396,22 +374,20 @@ class TestingRunningJobProperties(unittest.TestCase):
             running_job.status_msg
         ]
 
-        assert_equals(
-            get_info.call_args_list,
+        assert (
+            get_info.call_args_list ==
             [
                 call(u'rj-status_msg', job=True),
                 call(u'rj-status_msg', job=True)
-            ]
-        )
+            ])
 
-        assert_equals(
+        assert (
             [
                 'job is running',
                 'job finished successfully',
                 'job finished successfully'
-            ],
-            values
-        )
+            ] ==
+            values)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
@@ -432,10 +408,9 @@ class TestingRunningJobProperties(unittest.TestCase):
 
         get_info.assert_called_once_with('rj-grouping', job=True)
 
-        assert_equals(
-            [value, value],
-            values
-        )
+        assert (
+            [value, value] ==
+            values)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
@@ -456,10 +431,9 @@ class TestingRunningJobProperties(unittest.TestCase):
 
         get_info.assert_called_once_with('rj-grouping-instance', job=True)
 
-        assert_equals(
-            [value, value],
-            values
-        )
+        assert (
+            [value, value] ==
+            values)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
@@ -480,10 +454,9 @@ class TestingRunningJobProperties(unittest.TestCase):
 
         get_info.assert_called_once_with('rj-metadata', job=True)
 
-        assert_equals(
-            [value, value],
-            values
-        )
+        assert (
+            [value, value] ==
+            values)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -514,14 +487,13 @@ class TestingRunningStderr(unittest.TestCase):
         for i in range(10):
             running_job.stderr()
 
-        assert_equals(
+        assert (
             [
                 call('1234-update-stderr', headers=None),
                 call('1234-update-stderr', headers={'Range': 'bytes=12-'}),
                 call('1234-update-stderr', headers={'Range': 'bytes=24-'})
-            ],
-            get_stderr.call_args_list
-        )
+            ] ==
+            get_stderr.call_args_list)
 
     @patch('pygenie.jobs.running.RunningJob.update')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stderr')
@@ -547,14 +519,13 @@ class TestingRunningStderr(unittest.TestCase):
         for i in range(10):
             running_job.stderr(timeout=1)
 
-        assert_equals(
+        assert (
             [
                 call('1234-update-stderr', headers=None, timeout=1),
                 call('1234-update-stderr', headers={'Range': 'bytes=12-'}, timeout=1),
                 call('1234-update-stderr', headers={'Range': 'bytes=24-'}, timeout=1)
-            ],
-            get_stderr.call_args_list
-        )
+            ] ==
+            get_stderr.call_args_list)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stderr')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
@@ -586,7 +557,7 @@ class TestingRunningStderr(unittest.TestCase):
                 '1234-stderr-running',
                 headers={'Range': 'bytes={}-'.format(start)} if start > 0 else None)
 
-        assert_equals(36, len(running_job._cached_stderr))
+        assert 36 == len(running_job._cached_stderr)
 
     @patch('pygenie.jobs.running.RunningJob.update')
     @patch('pygenie.jobs.running.RunningJob._write_to_stream')
@@ -613,16 +584,15 @@ class TestingRunningStderr(unittest.TestCase):
                                               info={'status': 'RUNNING'})
         running_job.watch_stderr(interval=0)
 
-        assert_equals(36, len(running_job._cached_stderr))
-        assert_equals(
+        assert 36 == len(running_job._cached_stderr)
+        assert (
             [
                 call('line1\nline2\n'),
                 call('line3\nline4\n'),
                 call('line5\nline6\n'),
                 call('')
-            ],
-            write_to_stream.call_args_list
-        )
+            ] ==
+            write_to_stream.call_args_list)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stderr')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_status')
@@ -647,7 +617,7 @@ class TestingRunningStderr(unittest.TestCase):
         running_job = pygenie.jobs.RunningJob('1234-stderr-running-zero-bytes',
                                               info={'status': 'RUNNING'})
 
-        assert_equals(None, running_job._cached_stderr)
+        assert None == running_job._cached_stderr
 
         for i in stderr:
             running_job.stderr()
@@ -656,7 +626,7 @@ class TestingRunningStderr(unittest.TestCase):
                 '1234-stderr-running-zero-bytes',
                 headers=None)
 
-        assert_equals('', running_job._cached_stderr)
+        assert '' == running_job._cached_stderr
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stderr')
@@ -673,14 +643,13 @@ class TestingRunningStderr(unittest.TestCase):
         running_job.stderr_chunk(10, offset=0)
         running_job.stderr_chunk(10, offset=5)
 
-        assert_equals(
+        assert (
             [
                 call('1234-stderr-chunk', headers={'Range': 'bytes=-10'}),
                 call('1234-stderr-chunk', headers={'Range': 'bytes=0-10'}),
                 call('1234-stderr-chunk', headers={'Range': 'bytes=5-15'})
-            ],
-            get_stderr.call_args_list
-        )
+            ] ==
+            get_stderr.call_args_list)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stdout')
@@ -695,12 +664,11 @@ class TestingRunningStderr(unittest.TestCase):
 
         running_job.stdout_chunk(10, offset=0)
 
-        assert_equals(
+        assert (
             [
                 call('1234-stdout-chunk', headers={'Range': 'bytes=0-10'})
-            ],
-            get_stdout.call_args_list
-        )
+            ] ==
+            get_stdout.call_args_list)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_stdout')
@@ -715,12 +683,11 @@ class TestingRunningStderr(unittest.TestCase):
 
         chunk = running_job.stdout_chunk(10, offset=0)
 
-        assert_equals(
-            [],
-            get_stdout.call_args_list
-        )
+        assert (
+            [] ==
+            get_stdout.call_args_list)
 
-        assert_equals(chunk, None)
+        assert chunk == None
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_spark_log')
@@ -735,12 +702,11 @@ class TestingRunningStderr(unittest.TestCase):
 
         running_job.spark_log_chunk(10, offset=0)
 
-        assert_equals(
+        assert (
             [
                 call('1234-spark-log-chunk', headers={'Range': 'bytes=0-10'})
-            ],
-            get_spark_log.call_args_list
-        )
+            ] ==
+            get_spark_log.call_args_list)
 
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_info_for_rj')
     @patch('pygenie.adapter.genie_3.Genie3Adapter.get_spark_log')
@@ -755,9 +721,8 @@ class TestingRunningStderr(unittest.TestCase):
 
         chunk = running_job.spark_log_chunk(10, offset=0)
 
-        assert_equals(
-            [],
-            get_spark_log.call_args_list
-        )
+        assert (
+            [] ==
+            get_spark_log.call_args_list)
 
-        assert_equals(chunk, None)
+        assert chunk == None
