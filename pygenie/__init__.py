@@ -26,9 +26,9 @@ Run Job Example:
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
-import pkg_resources
+from importlib_metadata import version
 
-__version__ = pkg_resources.get_distribution('nflx-genie-client').version
+__version__ = version('nflx-genie-client')
 
 from .jobs.utils import (generate_job_id,
                          reattach_job)
