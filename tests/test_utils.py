@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import sys
 import unittest
 from socket import timeout
 
@@ -397,6 +398,7 @@ class TestGeneratingJobId(unittest.TestCase):
         path = 's3://root/myfile'
         assert is_file(path) == True
 
+    @pytest.mark.skipif(sys.version_info != (3, 7), reason="Requires Python 3.7")
     def test_is_file_for_s3path_with_null_bytes(self):
         # simulate https://github.com/python/cpython/pull/7695
         path = 's3://root/myfile\x00'
