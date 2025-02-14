@@ -41,7 +41,6 @@ setup(
     license='Apache 2.0',
     description='Genie Python Client.',
     long_description=long_description,
-    test_suite='tests',
     install_requires=[
         "decorator",
         "multipledispatch",
