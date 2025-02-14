@@ -1,5 +1,5 @@
 """
-  Copyright 2015 Netflix, Inc.
+  Copyright 2025 Netflix, Inc.
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -74,11 +74,9 @@ setup(
         # Pick your license as you wish (should match "license" above)
         'License :: OSI Approved :: Apache Software License',
 
-        # Specify the Python versions you support here. In particular, ensure
-        # that you indicate whether you support Python 2, Python 3 or both.
+        # Specify the Python versions you support here. 
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',        
     ],
 )

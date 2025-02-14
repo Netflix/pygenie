@@ -1,14 +1,10 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 import unittest
 
 from mock import patch
-from nose.tools import assert_equals, assert_raises
-
-
-assert_equals.__self__.maxDiff = None
-
 
 import pygenie
 
@@ -29,10 +25,9 @@ class TestingPigJob(unittest.TestCase):
 
         job = pygenie.jobs.PigJob()
 
-        assert_equals(
-            job.get('default_command_tags'),
-            [u'type:pig']
-        )
+        assert (
+            job.get('default_command_tags') ==
+            [u'type:pig'])
 
     def test_cmd_args_explicit(self):
         """Test PigJob explicit cmd args."""
@@ -42,10 +37,9 @@ class TestingPigJob(unittest.TestCase):
             .script("""A = LOAD SOMETHING;""") \
             .parameter('foo', 'fizz')
 
-        assert_equals(
-            job.cmd_args,
-            u'explicitly stating command args'
-        )
+        assert (
+            job.cmd_args ==
+            u'explicitly stating command args')
 
     def test_cmd_args_constructed_script_code(self):
         """Test PigJob constructed cmd args for adhoc script."""
@@ -62,7 +56,7 @@ class TestingPigJob(unittest.TestCase):
             .property_file('/Users/pig/props1.conf') \
             .property_file('/Users/pig/props2.conf')
 
-        assert_equals(
+        assert (
             " ".join([
                 "-Dprop1=v1 -Dprop2=v2",
                 "-P props1.conf -P props2.conf",
@@ -70,9 +64,8 @@ class TestingPigJob(unittest.TestCase):
                 "-param_file params2.param",
                 "-param_file _pig_parameters.txt",
                 "-f script.pig"
-            ]),
-            job.cmd_args
-        )
+            ]) ==
+            job.cmd_args)
 
     @patch('pygenie.jobs.pig.is_file')
     def test_cmd_args_constructed_script_file(self, is_file):
@@ -89,16 +82,15 @@ class TestingPigJob(unittest.TestCase):
             .property_file('/Users/pig/p1.conf') \
             .property_file('/Users/pig/p2.conf')
 
-        assert_equals(
+        assert (
             " ".join([
                 "-Dp1=v1 -Dp2=v2",
                 "-P p1.conf -P p2.conf",
                 "-param_file p.params",
                 "-param_file _pig_parameters.txt",
                 "-f test.pig"
-            ]),
-            job.cmd_args
-        )
+            ]) ==
+            job.cmd_args)
 
     @patch('pygenie.jobs.pig.is_file')
     def test_cmd_args_post_cmd_args(self, is_file):
@@ -118,7 +110,7 @@ class TestingPigJob(unittest.TestCase):
             .post_cmd_args(['a', 'b', 'c']) \
             .post_cmd_args('d e f')
 
-        assert_equals(
+        assert (
             " ".join([
                 "-Dp1=v1 -Dp2=v2",
                 "-P p1.conf -P p2.conf",
@@ -126,9 +118,8 @@ class TestingPigJob(unittest.TestCase):
                 "-param_file _pig_parameters.txt",
                 "-f test.pig",
                 "a b c d e f"
-            ]),
-            job.cmd_args
-        )
+            ]) ==
+            job.cmd_args)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -158,10 +149,9 @@ unicode = "\u0147\u0147\u0147"
 filter_ts = "ts >= '2000-01-01 00:00:00' AND ts < '2000-12-31 00:00:00'"\
 """
 
-        assert_equals(
-            param_file,
-            job._parameter_file
-        )
+        assert (
+            param_file ==
+            job._parameter_file)
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -206,7 +196,7 @@ class TestingPigJobRepr(unittest.TestCase):
             .tags('pig_tag_1') \
             .tags('pig_tag_2')
 
-        assert_equals(
+        assert (
             '.'.join([
                 'PigJob()',
                 'applications("pig_app_1")',
@@ -238,9 +228,8 @@ class TestingPigJobRepr(unittest.TestCase):
                 'script("/Users/pig/testscript.pig")',
                 'tags("pig_tag_1")',
                 'tags("pig_tag_2")'
-            ]),
-            str(job)
-        )
+            ]) ==
+            str(job))
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
@@ -288,8 +277,8 @@ class TestingPigJobAdapters(unittest.TestCase):
             .tags('pigtag1, pigtag2') \
             .job_version('0.0.1pig')
 
-        assert_equals(
-            pygenie.adapter.genie_2.get_payload(job),
+        assert (
+            pygenie.adapter.genie_2.get_payload(job) ==
             {
                 u'attachments': [
                     {u'data': u'file contents', u'name': u'pigfile1'},
@@ -325,8 +314,7 @@ class TestingPigJobAdapters(unittest.TestCase):
                 u'tags': [u'pigtag1', u'pigtag2'],
                 u'user': u'jpig',
                 u'version': u'0.0.1pig'
-            }
-        )
+            })
 
     @patch('pygenie.adapter.genie_2.to_attachment')
     @patch('os.path.isfile')
@@ -355,8 +343,8 @@ class TestingPigJobAdapters(unittest.TestCase):
             .tags('pigtag') \
             .job_version('0.0.pig')
 
-        assert_equals(
-            pygenie.adapter.genie_2.get_payload(job),
+        assert (
+            pygenie.adapter.genie_2.get_payload(job) ==
             {
                 u'attachments': [
                     {u'name': u'pigfile1', u'data': u'file contents'},
@@ -379,8 +367,7 @@ class TestingPigJobAdapters(unittest.TestCase):
                 u'tags': [u'pigtag'],
                 u'user': u'jpig',
                 u'version': u'0.0.pig'
-            }
-        )
+            })
 
     @patch('pygenie.adapter.genie_3.open')
     @patch('os.path.isfile')
@@ -416,7 +403,7 @@ class TestingPigJobAdapters(unittest.TestCase):
             .tags('pigtag1, pigtag2') \
             .job_version('0.0.1pig')
 
-        assert_equals(
+        assert (
             {
                 'applications': ['pig_app_1'],
                 'attachments': [
@@ -452,9 +439,8 @@ class TestingPigJobAdapters(unittest.TestCase):
                 'timeout': 1,
                 'user': 'jpig',
                 'version': '0.0.1pig'
-            },
-            pygenie.adapter.genie_3.get_payload(job)
-        )
+            } ==
+            pygenie.adapter.genie_3.get_payload(job))
 
     @patch('pygenie.adapter.genie_3.open')
     @patch('os.path.isfile')
@@ -483,7 +469,7 @@ class TestingPigJobAdapters(unittest.TestCase):
             .tags('pigtag') \
             .job_version('0.0.pig')
 
-        assert_equals(
+        assert (
             {
                 'applications': ['pigapp1'],
                 'attachments': [
@@ -508,6 +494,5 @@ class TestingPigJobAdapters(unittest.TestCase):
                 'timeout': 7,
                 'user': 'jpig',
                 'version': '0.0.pig'
-            },
-            pygenie.adapter.genie_3.get_payload(job)
-        )
+            } ==
+            pygenie.adapter.genie_3.get_payload(job))

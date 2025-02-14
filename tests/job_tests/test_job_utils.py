@@ -3,15 +3,10 @@ Test job utils.
 """
 
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import unittest
-
-from nose.tools import assert_equals, assert_raises
-
-
-assert_equals.__self__.maxDiff = None
-
 
 from pygenie.jobs.utils import arg_list
 
@@ -36,10 +31,9 @@ class TestArgList(unittest.TestCase):
         arglist.add_to_list('b')
         arglist.add_to_list('c')
 
-        assert_equals(
-            ['a', 'b', 'c'],
-            arglist.my_list
-        )
+        assert (
+            ['a', 'b', 'c'] ==
+            arglist.my_list)
 
     def test_lists(self):
         """Test pygenie.jobs.utils.arg_list with list of string arguments."""
@@ -49,10 +43,9 @@ class TestArgList(unittest.TestCase):
         arglist.add_to_list(['2'])
         arglist.add_to_list(['3'])
 
-        assert_equals(
-            ['1', '2', '3'],
-            arglist.my_list
-        )
+        assert (
+            ['1', '2', '3'] ==
+            arglist.my_list)
 
     def test_duplicates_strs(self):
         """Test pygenie.jobs.utils.arg_list with duplicate arguments (strings)."""
@@ -62,10 +55,9 @@ class TestArgList(unittest.TestCase):
         arglist.add_to_list('e')
         arglist.add_to_list('f')
 
-        assert_equals(
-            ['f', 'e'],
-            arglist.my_list
-        )
+        assert (
+            ['f', 'e'] ==
+            arglist.my_list)
 
     def test_mixed_types(self):
         """Test pygenie.jobs.utils.arg_list with mixed type arguments."""
@@ -75,7 +67,6 @@ class TestArgList(unittest.TestCase):
         arglist.add_to_list([{'h': 'h'}])
         arglist.add_to_list('f')
 
-        assert_equals(
-            ["g", {"h": "h"}, "f"],
-            arglist.my_list
-        )
+        assert (
+            ["g", {"h": "h"}, "f"] ==
+            arglist.my_list)

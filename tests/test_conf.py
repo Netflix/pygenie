@@ -1,14 +1,13 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 import sys
 import unittest
-
 from functools import wraps
-from mock import patch
-from nose.tools import assert_equals
 
 from configurator import Configurator as C
+from mock import patch
 
 from pygenie.conf import GenieConf
 
@@ -103,8 +102,8 @@ class TestGenieConf(unittest.TestCase):
         config_home_ini.return_value = None
         genie_conf = GenieConf()
         genie_conf.load_config_file(self.config_file)
-        assert_equals(
-            genie_conf.to_dict(),
+        assert (
+            genie_conf.to_dict() ==
             {
                 u'genie': {
                     u'url': u'http://foo:8080',
@@ -116,8 +115,7 @@ class TestGenieConf(unittest.TestCase):
                     u'from_cmd_line': u'from_ini_2',
                     u'from_ini': u'from_ini_3'
                 }
-            }
-        )
+            })
 
     @reset_environment
     @patch('pygenie.conf.GenieConf.config_file_env')
@@ -132,8 +130,8 @@ class TestGenieConf(unittest.TestCase):
         genie_conf.add_session_adapter('https://', {})
         self.assertEqual(genie_conf.session_adapters, {'https://': {}})
 
-        assert_equals(
-            genie_conf.to_dict(),
+        assert (
+            genie_conf.to_dict() ==
             {
                 u'genie': {
                     u'url': u'http://foo:8080',
@@ -145,8 +143,7 @@ class TestGenieConf(unittest.TestCase):
                     u'from_cmd_line': u'from_ini_2',
                     u'from_ini': u'from_ini_3'
                 }
-            }
-        )
+            })
         genie_conf.remove_session_adapter('https://')
         self.assertEqual(genie_conf.session_adapters, {})
 
@@ -163,7 +160,7 @@ class TestGenieConf(unittest.TestCase):
             os.environ['genie_username'] = 'genie_user_env_1'
             genie_conf = GenieConf()
             genie_conf.load_config_file(self.config_file)
-            assert_equals(genie_conf.genie.username, 'user_cmdline_1')
+            assert genie_conf.genie.username == 'user_cmdline_1'
 
     @reset_environment
     @patch('pygenie.conf.GenieConf.config_file_env')
@@ -177,7 +174,7 @@ class TestGenieConf(unittest.TestCase):
         os.environ['genie_username'] = 'genie_user_env_2'
         genie_conf = GenieConf()
         genie_conf.load_config_file(self.config_file)
-        assert_equals(genie_conf.genie.username, 'user_ini')
+        assert genie_conf.genie.username == 'user_ini'
 
     @reset_environment
     @patch('pygenie.conf.GenieConf.config_file_env')
@@ -190,7 +187,7 @@ class TestGenieConf(unittest.TestCase):
         os.environ['USER'] = 'os_user_env_3'
         os.environ['genie_username'] = 'genie_user_env_3'
         genie_conf = GenieConf()
-        assert_equals(genie_conf.genie.username, 'genie_user_env_3')
+        assert genie_conf.genie.username == 'genie_user_env_3'
 
     @reset_environment
     @patch('pygenie.conf.GenieConf.config_file_env')
@@ -202,4 +199,4 @@ class TestGenieConf(unittest.TestCase):
         config_home_ini.return_value = None
         os.environ['USER'] = 'os_user_env_4'
         genie_conf = GenieConf()
-        assert_equals(genie_conf.genie.username, 'os_user_env_4')
+        assert genie_conf.genie.username == 'os_user_env_4'

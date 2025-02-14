@@ -1,9 +1,10 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import json
-import requests
 import uuid
+
+import requests
 
 
 def fake_response(content, status_code=200, method='GET'):
