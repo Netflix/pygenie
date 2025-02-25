@@ -458,7 +458,7 @@ class GenieJob(object):
 
         return self.archive(False)
 
-    def execute(self, retry=False, force=False, catch_signal=False, **kwargs):
+    def execute(self, retry=False, force=False, override_existing=False, catch_signal=False, **kwargs):
         """
         Send the job to Genie and execute.
 
@@ -473,6 +473,9 @@ class GenieJob(object):
             force (bool, optional): If True, will do the same thing as
                 retry=True, but will generate a new job id even if there is
                 a successful execution (Default: False).
+            override_existing (bool, optional): If True, will do the same thing as
+                force=True, but will generate a new job id and kill the previous
+                running executions (Default: False).
             catch_signal (bool, optional): If True, will add signal handlers to
                 kill the running job for SIGINT, SIGTERM, and SIGABRT
                 (Default: False).
@@ -499,15 +502,16 @@ class GenieJob(object):
             signal.signal(signal.SIGTERM, sig_handler)
             signal.signal(signal.SIGABRT, sig_handler)
 
-        if retry or force:
+        if retry or force or override_existing:
             uid = self._job_id
             try:
                 # below uid should be uid of job with one of following status:
                 #     - new
-                #     - running
-                #     - (if force=False) successful
+                #     - (if override_existing=False) running
+                #     - (if force=False and override_existing=False) successful
                 uid = generate_job_id(uid,
-                                      return_success=not force,
+                                      return_success=not (force or override_existing),
+                                      override_existing=override_existing,
                                       conf=self._conf)
                 # new uid will raise and be handled in the except block
                 # assigning to running_job variable for killing on signal

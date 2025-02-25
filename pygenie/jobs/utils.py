@@ -177,7 +177,7 @@ def arg_string(func):
     return decorator(wrapper, func)
 
 
-def generate_job_id(job_id, return_success=True, conf=None):
+def generate_job_id(job_id, return_success=True, override_existing=False, conf=None):
     """
     Generate a new job id.
 
@@ -185,9 +185,13 @@ def generate_job_id(job_id, return_success=True, conf=None):
     1) the generated id is for a job that is running or successful
     2) the generated id is completely new
 
-    If return_success is False, will continue to generate an id until either
+    If return_success is False and override_existing is False, will continue to
+    generate an id until either
     1) the generated id is for a job that is running
     2) the generated id is completely new
+
+    If override_existing is True, will continue to generate an id until
+    the generated id is completely new and kill the discovered running job(s)
     """
 
     while True:
@@ -196,7 +200,12 @@ def generate_job_id(job_id, return_success=True, conf=None):
             logger.debug("job id '%s' exists with status '%s'",
                          job_id,
                          running_job.status)
-            if not running_job.is_done \
+            if override_existing:
+                if not running_job.is_done:
+                    logger.warning("killing job id %s", job_id)
+                    response = running_job.kill()
+                    response.raise_for_status()
+            elif not running_job.is_done \
                     or (running_job.is_done \
                         and running_job.is_successful \
                         and return_success):
