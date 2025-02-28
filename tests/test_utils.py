@@ -394,11 +394,22 @@ class TestGeneratingJobId(unittest.TestCase):
 
         assert job_id+'-4' == generate_job_id(job_id, return_success=False)
 
-    @patch('pygenie.jobs.utils.reattach_job')
-    def test_gen_job_id_with_override_existing_true(self, mock_reattach_job):
-        """Test generating job id with overriding existing job set to True."""
+    def test_gen_job_id_with_return_success_true_override_existing_true(self):
+        """Test generating job id with both returning successful job and overriding existing job set to True."""
 
-        job_id = 'override-existing-true'
+        job_id = 'return-successful-true-override-existing-true'
+
+        with self.assertRaises(ValueError) as context:
+            generate_job_id(job_id, return_success=True, override_existing=True)
+
+        self.assertEqual(str(context.exception), "return_success and override_existing cannot both be True")
+
+    @patch('pygenie.jobs.utils.reattach_job')
+    def test_gen_job_id_with_return_success_false_override_existing_true(self, mock_reattach_job):
+        """Test generating job id with returning successful job set to False and
+        overriding existing job set to True."""
+
+        job_id = 'return-successful-false-override-existing-true'
 
         mock_reattach_job.side_effect = [
             FakeRunningJob(job_id=job_id, status='FAILED'),
@@ -410,13 +421,14 @@ class TestGeneratingJobId(unittest.TestCase):
             GenieJobNotFoundError
         ]
 
-        assert job_id + '-6' == generate_job_id(job_id, override_existing=True)
+        assert job_id + '-6' == generate_job_id(job_id, return_success=False, override_existing=True)
 
     @patch('pygenie.jobs.utils.reattach_job')
-    def test_gen_job_id_with_override_existing_true_with_running(self, mock_reattach_job):
-        """Test generating job id with overriding existing job set to True with a job that is running."""
+    def test_gen_job_id_with_return_success_false_override_existing_true_with_running(self, mock_reattach_job):
+        """Test generating job id with returning successful job set to False and
+        overriding existing job set to True with a job that is running."""
 
-        job_id = 'override-existing-true-running'
+        job_id = 'return-successful-false-override-existing-true-running'
 
         mock_running_job = MagicMock()
         mock_running_job.job_id = job_id + '-5'
@@ -434,7 +446,7 @@ class TestGeneratingJobId(unittest.TestCase):
             GenieJobNotFoundError
         ]
 
-        assert job_id + '-6' == generate_job_id(job_id, override_existing=True)
+        assert job_id + '-6' == generate_job_id(job_id, return_success=False, override_existing=True)
         mock_running_job.kill.assert_called_once()
 
     def test_is_file_for_valid_s3path(self):

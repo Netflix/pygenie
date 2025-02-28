@@ -325,6 +325,18 @@ class TestingJobExecute(unittest.TestCase):
         exec_job.assert_called_once_with(job)
         assert new_job_id == job._job_id
 
+    def test_job_execute_raises_error_when_override_without_force(self):
+        """Testing job execution when override_existing is True but force is False."""
+
+        with self.assertRaises(ValueError) as context:
+            pygenie.jobs.HiveJob() \
+                .job_id('exec') \
+                .genie_username('exectester') \
+                .script('select * from db.table') \
+                .execute(force=False, override_existing=True)
+
+        self.assertEqual(str(context.exception), "override_existing cannot be True without force=True")
+
     @patch('pygenie.jobs.core.reattach_job')
     @patch('pygenie.jobs.core.generate_job_id')
     @patch('pygenie.jobs.core.execute_job')

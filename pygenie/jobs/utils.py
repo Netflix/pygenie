@@ -190,9 +190,13 @@ def generate_job_id(job_id, return_success=True, override_existing=False, conf=N
     1) the generated id is for a job that is running
     2) the generated id is completely new
 
-    If override_existing is True, will continue to generate an id until
-    the generated id is completely new and kill the discovered running job(s)
+    If return_success is False and override_existing is True, will continue to
+    generate an id until the generated id is completely new and kill the
+    discovered running job(s)
     """
+
+    if return_success and override_existing:
+        raise ValueError("return_success and override_existing cannot both be True")
 
     while True:
         try:
@@ -200,7 +204,7 @@ def generate_job_id(job_id, return_success=True, override_existing=False, conf=N
             logger.debug("job id '%s' exists with status '%s'",
                          job_id,
                          running_job.status)
-            if override_existing:
+            if not return_success and override_existing:
                 if not running_job.is_done:
                     logger.warning("killing job id %s", job_id)
                     response = running_job.kill()

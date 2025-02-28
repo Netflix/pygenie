@@ -484,6 +484,9 @@ class GenieJob(object):
             :py:class:`RunningJob`: A running job object.
         """
 
+        if not force and override_existing:
+            raise ValueError("override_existing cannot be True without force=True")
+
         if catch_signal:
             import signal
             import sys
@@ -502,15 +505,15 @@ class GenieJob(object):
             signal.signal(signal.SIGTERM, sig_handler)
             signal.signal(signal.SIGABRT, sig_handler)
 
-        if retry or force or override_existing:
+        if retry or force:
             uid = self._job_id
             try:
                 # below uid should be uid of job with one of following status:
                 #     - new
                 #     - (if override_existing=False) running
-                #     - (if force=False and override_existing=False) successful
+                #     - (if force=False) successful
                 uid = generate_job_id(uid,
-                                      return_success=not (force or override_existing),
+                                      return_success=not force,
                                       override_existing=override_existing,
                                       conf=self._conf)
                 # new uid will raise and be handled in the except block
