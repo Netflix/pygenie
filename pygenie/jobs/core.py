@@ -482,6 +482,9 @@ class GenieJob(object):
 
         Returns:
             :py:class:`RunningJob`: A running job object.
+
+        Raises:
+            ValueError: If `override_existing` is True without `force` being True.
         """
 
         if not force and override_existing:

@@ -193,6 +193,20 @@ def generate_job_id(job_id, return_success=True, override_existing=False, conf=N
     If return_success is False and override_existing is True, will continue to
     generate an id until the generated id is completely new and kill the
     discovered running job(s)
+
+    Args:
+        job_id (str): The initial job id to start the generation process.
+        return_success (bool, optional): If True, allows returning an id for a successful job.
+            Defaults to True.
+        override_existing (bool, optional): If True, will terminate any running jobs
+            found during id generation. Defaults to False.
+        conf (optional): Configuration settings to be used during job reattachment. Defaults to None.
+
+    Returns:
+        str: A valid job id that meets the specified conditions.
+
+    Raises:
+        ValueError: If both `return_success` and `override_existing` are set to True.
     """
 
     if return_success and override_existing:
