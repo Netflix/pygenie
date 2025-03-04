@@ -292,6 +292,7 @@ class TestingJobExecute(unittest.TestCase):
 
         gen_job_id.assert_called_once_with(job_id,
                                            return_success=True,
+                                           override_existing=False,
                                            conf=job._conf)
         reattach_job.assert_called_once_with(new_job_id, conf=job._conf)
         exec_job.assert_called_once_with(job)
@@ -318,6 +319,46 @@ class TestingJobExecute(unittest.TestCase):
 
         gen_job_id.assert_called_once_with(job_id,
                                            return_success=False,
+                                           override_existing=False,
+                                           conf=job._conf)
+        reattach_job.assert_called_once_with(new_job_id, conf=job._conf)
+        exec_job.assert_called_once_with(job)
+        assert new_job_id == job._job_id
+
+    def test_job_execute_raises_error_when_override_without_force(self):
+        """Testing job execution when override_existing is True but force is False."""
+
+        with self.assertRaises(ValueError) as context:
+            pygenie.jobs.HiveJob() \
+                .job_id('exec') \
+                .genie_username('exectester') \
+                .script('select * from db.table') \
+                .execute(force=False, override_existing=True)
+
+        self.assertEqual(str(context.exception), "override_existing cannot be True without force=True")
+
+    @patch('pygenie.jobs.core.reattach_job')
+    @patch('pygenie.jobs.core.generate_job_id')
+    @patch('pygenie.jobs.core.execute_job')
+    def test_job_execute_retry_force_override_existing(self, exec_job, gen_job_id, reattach_job):
+        """Testing job execution with force retry and override existing."""
+
+        job_id = 'exec-retry-force-override-existing'
+        new_job_id = '{}-9'.format(job_id)
+
+        gen_job_id.return_value = new_job_id
+        reattach_job.side_effect = pygenie.exceptions.GenieJobNotFoundError
+
+        job = pygenie.jobs.HiveJob() \
+            .job_id(job_id) \
+            .genie_username('exectester') \
+            .script('select * from db.table')
+
+        job.execute(retry=True, force=True, override_existing=True)
+
+        gen_job_id.assert_called_once_with(job_id,
+                                           return_success=False,
+                                           override_existing=True,
                                            conf=job._conf)
         reattach_job.assert_called_once_with(new_job_id, conf=job._conf)
         exec_job.assert_called_once_with(job)

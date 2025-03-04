@@ -177,7 +177,7 @@ def arg_string(func):
     return decorator(wrapper, func)
 
 
-def generate_job_id(job_id, return_success=True, conf=None):
+def generate_job_id(job_id, return_success=True, override_existing=False, conf=None):
     """
     Generate a new job id.
 
@@ -185,10 +185,32 @@ def generate_job_id(job_id, return_success=True, conf=None):
     1) the generated id is for a job that is running or successful
     2) the generated id is completely new
 
-    If return_success is False, will continue to generate an id until either
+    If return_success is False and override_existing is False, will continue to
+    generate an id until either
     1) the generated id is for a job that is running
     2) the generated id is completely new
+
+    If return_success is False and override_existing is True, will continue to
+    generate an id until the generated id is completely new and kill the
+    discovered running job(s)
+
+    Args:
+        job_id (str): The initial job id to start the generation process.
+        return_success (bool, optional): If True, allows returning an id for a successful job.
+            Defaults to True.
+        override_existing (bool, optional): If True, will terminate any running jobs
+            found during id generation. Defaults to False.
+        conf (optional): Configuration settings to be used during job reattachment. Defaults to None.
+
+    Returns:
+        str: A valid job id that meets the specified conditions.
+
+    Raises:
+        ValueError: If both `return_success` and `override_existing` are set to True.
     """
+
+    if return_success and override_existing:
+        raise ValueError("return_success and override_existing cannot both be True")
 
     while True:
         try:
@@ -196,7 +218,12 @@ def generate_job_id(job_id, return_success=True, conf=None):
             logger.debug("job id '%s' exists with status '%s'",
                          job_id,
                          running_job.status)
-            if not running_job.is_done \
+            if not return_success and override_existing:
+                if not running_job.is_done:
+                    logger.warning("killing job id %s", job_id)
+                    response = running_job.kill()
+                    response.raise_for_status()
+            elif not running_job.is_done \
                     or (running_job.is_done \
                         and running_job.is_successful \
                         and return_success):
