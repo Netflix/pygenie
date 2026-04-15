@@ -26,7 +26,7 @@ Run Job Example:
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
-from importlib_metadata import version
+from importlib.metadata import version
 
 __version__ = version('nflx-genie-client')
 

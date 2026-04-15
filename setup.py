@@ -41,6 +41,7 @@ setup(
     license='Apache 2.0',
     description='Genie Python Client.',
     long_description=long_description,
+    python_requires='>=3.9',
     install_requires=[
         "decorator",
         "multipledispatch",
@@ -48,7 +49,6 @@ setup(
         "python-dateutil >= 2.4",
         "requests",
         "six",
-        "importlib-metadata",
     ],
     setup_requires=['setupmeta'],
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers

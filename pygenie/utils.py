@@ -19,7 +19,7 @@ import time
 import uuid
 
 from functools import wraps
-from importlib_metadata import version
+from importlib.metadata import version
 
 import requests
 
