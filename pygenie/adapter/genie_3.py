@@ -434,9 +434,12 @@ class Genie3Adapter(GenieBaseAdapter):
 
         files = [('request', ('', json.dumps(payload), 'application/json'))]
 
-        for att in attachments:
-            files.append(('attachment', att))
-            logger.debug('adding attachment: %s', att)
+        for name, data in attachments:
+            # requests consumes file-like objects each time it encodes the multipart body.
+            if hasattr(data, 'read'):
+                data = data.read()
+            files.append(('attachment', (name, data)))
+            logger.debug('adding attachment: %s', name)
 
         logger.debug('payload to genie 3:')
         logger.debug(json.dumps(payload,
