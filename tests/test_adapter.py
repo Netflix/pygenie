@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function,
 import unittest
 
 import pytest
+import responses
 from mock import call, patch
 
 from pygenie.adapter.genie_3 import Genie3Adapter, get_payload
@@ -110,6 +111,27 @@ class TestGenie3JobSubmission(unittest.TestCase):
                            backoff=0)
 
         assert 6 == request.call_count
+
+
+def test_submit_retries_local_attachments(tmp_path, monkeypatch):
+    monkeypatch.setenv('GENIE_BYPASS_HOME_CONFIG', '1')
+    script = tmp_path / 'query.sql'
+    script.write_bytes(b'select 12345')
+    deps = tmp_path / 'deps'
+    deps.mkdir()
+    (deps / 'data.bin').write_bytes(b'\xff\x00dependency')
+    job = PrestoJob().script(str(script)).dependencies(str(deps))
+    url = job._conf.genie.url + '/api/v3/jobs'
+
+    with responses.RequestsMock() as requests:
+        requests.add(responses.POST, url, status=503)
+        requests.add(responses.POST, url, status=202)
+        Genie3Adapter().submit_job(job, attempts=2, backoff=0)
+
+        assert len(requests.calls) == 2
+        for attempt in requests.calls:
+            assert b'select 12345' in attempt.request.body
+            assert b'\xff\x00dependency' in attempt.request.body
 
 
 @patch.dict('os.environ', {'GENIE_BYPASS_HOME_CONFIG': '1'})
